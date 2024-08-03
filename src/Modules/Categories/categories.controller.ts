@@ -1,9 +1,11 @@
+import slugify from "slugify";
 import { RequestHandler } from "express";
 import createHttpError from "http-errors";
 import { nanoid } from "nanoid";
-import { cloudinaryConfig, env } from "../../Utils";
-import { CategoryModel } from "../../../DB/Models";
-import slugify from "slugify";
+// utils
+import { cloudinaryConfig, env, uploadFile } from "../../Utils";
+// models
+import { CategoryModel, SubCategoryModel } from "../../../DB/Models";
 
 /**
  * @api {POST} /categories/create create a new category
@@ -19,12 +21,10 @@ export const createCategory: RequestHandler = async (req, res, next) => {
 
     // upload the image to cloudinary
     const customId = nanoid(4);
-    const { secure_url, public_id } = await cloudinaryConfig().uploader.upload(
-      req.file.path,
-      {
-        folder: `${env.UPLOADS_FOLDER}/Categories/${customId}`,
-      }
-    );
+    const { secure_url, public_id } = await uploadFile({
+      file: req.file.path,
+      folder: `${env.UPLOADS_FOLDER}/Categories/${customId}`,
+    });
 
     // prepare category object
     const category = {
@@ -96,7 +96,7 @@ export const updateCategory: RequestHandler = async (req, res, next) => {
       throw createHttpError(404, "Category not found");
     }
 
-    // name of the category
+    // Update name and slug of the category
     if (name) {
       category.name = name;
       category.slug = slugify(name, {
@@ -105,19 +105,17 @@ export const updateCategory: RequestHandler = async (req, res, next) => {
       });
     }
 
-    //Image
+    // Update Image
     if (req.file) {
       const splittedPublicId = category.Images.public_id.split(
         `${category.customId}/`
       )[1];
 
-      const { secure_url } = await cloudinaryConfig().uploader.upload(
-        req.file.path,
-        {
-          folder: `${env.UPLOADS_FOLDER}/Categories/${category.customId}`,
-          public_id: splittedPublicId,
-        }
-      );
+      const { secure_url } = await uploadFile({
+        file: req.file.path,
+        folder: `${env.UPLOADS_FOLDER}/Categories/${category.customId}`,
+        publicId: splittedPublicId,
+      });
       category.Images.secure_url = secure_url;
     }
 
@@ -142,17 +140,27 @@ export const deleteCategory: RequestHandler = async (req, res, next) => {
 
   try {
     // find category and delete
-    const deletedCategory = await CategoryModel.findOneAndDelete({ _id });
+    const category = await CategoryModel.findByIdAndDelete(_id);
 
     // check if deleted category exists in the database
-    if (!deletedCategory) {
+    if (!category) {
       throw createHttpError(404, "Category not found");
     }
+
+    // delete related images from cloudinary
+    const categoryPath = `${env.UPLOADS_FOLDER}/Categories/${category?.customId}`;
+    await cloudinaryConfig().api.delete_resources_by_prefix(categoryPath);
+    await cloudinaryConfig().api.delete_folder(categoryPath);
+
+    // delete related subcategories from db
+    const deletedSubCategories = await SubCategoryModel.deleteMany({
+      categoryId: _id,
+    });
 
     res.status(200).json({
       status: "success",
       message: "Category deleted successfully",
-      data: deletedCategory,
+      data: category,
     });
   } catch (error) {
     next(error);

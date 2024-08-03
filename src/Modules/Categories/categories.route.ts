@@ -30,8 +30,8 @@ const categoryRouter = Router();
 categoryRouter.post(
   "/create",
   multerHost({ allowedExtensions: extensions.Images }).single("image"),
-  getDocumentByName(CategoryModel),
   validationMiddleware(createCategorySchema),
+  getDocumentByName(CategoryModel),
   createCategory
 );
 
@@ -40,8 +40,8 @@ categoryRouter.get("/", validationMiddleware(getCategorySchema), getCategory);
 categoryRouter.put(
   "/update/:_id",
   multerHost({ allowedExtensions: extensions.Images }).single("image"),
-  getDocumentByName(CategoryModel),
   validationMiddleware(updateCategorySchema),
+  getDocumentByName(CategoryModel),
   updateCategory
 );
 

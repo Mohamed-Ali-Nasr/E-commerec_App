@@ -1,7 +1,7 @@
 import Joi from "joi";
 import { objectIdRule } from "../../Utils";
 
-export const createCategorySchema = {
+export const createSubCategorySchema = {
   body: Joi.object({
     name: Joi.string()
       .pattern(/^([A-Z]|[a-z]){3,}((\s+|\W|_)\w+)*$/)
@@ -11,9 +11,13 @@ export const createCategorySchema = {
           "Category Name Must Start With At Least Three Alphabet Letters",
       }),
   }),
+
+  query: Joi.object({
+    categoryId: Joi.string().custom(objectIdRule).required(),
+  }),
 };
 
-export const getCategorySchema = {
+export const getSubCategorySchema = {
   query: Joi.object({
     name: Joi.string()
       .pattern(/^([A-Z]|[a-z]){3,}((\s+|\W|_)\w+)*$/)
@@ -28,7 +32,7 @@ export const getCategorySchema = {
   }).optional(),
 };
 
-export const updateCategorySchema = {
+export const updateSubCategorySchema = {
   body: Joi.object({
     name: Joi.string()
       .pattern(/^([A-Z]|[a-z]){3,}((\s+|\W|_)\w+)*$/)
@@ -44,6 +48,6 @@ export const updateCategorySchema = {
   }),
 };
 
-export const deletedCategorySchema = {
-  params: updateCategorySchema.params,
+export const deletedSubCategorySchema = {
+  params: updateSubCategorySchema.params,
 };
