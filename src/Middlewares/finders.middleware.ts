@@ -1,8 +1,7 @@
 import { RequestHandler } from "express";
 import createHttpError from "http-errors";
-import { Model } from "mongoose";
 
-export const getDocumentByName = (model: Model<any>): RequestHandler => {
+export const getDocumentByName = (model: any): RequestHandler => {
   return async (req, res, next) => {
     const { name } = req.body;
     if (name) {

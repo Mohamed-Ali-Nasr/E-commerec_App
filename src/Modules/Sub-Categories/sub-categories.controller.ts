@@ -5,12 +5,16 @@ import { nanoid } from "nanoid";
 // utils
 import { cloudinaryConfig, env, uploadFile } from "../../Utils";
 // models
-import { CategoryModel, SubCategoryModel } from "../../../DB/Models";
+import {
+  BrandModel,
+  CategoryModel,
+  SubCategoryModel,
+} from "../../../DB/Models";
 // types
 import { ICategory } from "../../../types";
 
 /**
- * @api {POST} /sub-categories/create create a new subCategory
+ * @api {POST} /sub-categories/create  create a new subCategory
  */
 export const createSubCategory: RequestHandler = async (req, res, next) => {
   // destructuring the request body
@@ -49,6 +53,10 @@ export const createSubCategory: RequestHandler = async (req, res, next) => {
     // create the category in db
     const newSubCategory = await SubCategoryModel.create(subCategory);
 
+    // Push the id of new subcategory to subcategories id Array in Category Model
+    (category?.subCategoriesId as string[]).push(newSubCategory._id);
+    await category?.save();
+
     // send the response
     res.status(201).json({
       status: "success",
@@ -61,7 +69,7 @@ export const createSubCategory: RequestHandler = async (req, res, next) => {
 };
 
 /**
- * @api {GET} /sub-categories Get subcategory of specific category by name or id or slug
+ * @api {GET} /sub-categories  Get subcategory of specific category by name or id or slug
  */
 export const getSubCategory: RequestHandler = async (req, res, next) => {
   const { id, name, slug } = req.query;
@@ -105,8 +113,7 @@ export const updateSubCategory: RequestHandler = async (req, res, next) => {
     const subcategory = await SubCategoryModel.findById(_id).populate([
       {
         path: "categoryId",
-        model: CategoryModel,
-        select: "_id name customId",
+        select: "_id name slug customId",
       },
     ]);
     if (!subcategory) {
@@ -162,8 +169,7 @@ export const deleteSubCategory: RequestHandler = async (req, res, next) => {
     const subcategory = await SubCategoryModel.findByIdAndDelete(_id).populate([
       {
         path: "categoryId",
-        model: CategoryModel,
-        select: "_id name customId",
+        select: "_id name slug customId",
       },
     ]);
 
@@ -173,16 +179,58 @@ export const deleteSubCategory: RequestHandler = async (req, res, next) => {
     }
 
     // delete related images from cloudinary
-    const categoryPath = `${env.UPLOADS_FOLDER}/Categories/${
+    const subcategoryPath = `${env.UPLOADS_FOLDER}/Categories/${
       (subcategory.categoryId as ICategory).customId
     }/SubCategories/${subcategory.customId}`;
-    await cloudinaryConfig().api.delete_resources_by_prefix(categoryPath);
-    await cloudinaryConfig().api.delete_folder(categoryPath);
+    await cloudinaryConfig().api.delete_resources_by_prefix(subcategoryPath);
+    await cloudinaryConfig().api.delete_folder(subcategoryPath);
+
+    // delete the related brands from db
+    await BrandModel.deleteMany({
+      subcategoryId: subcategory._id,
+    });
+    // if (deletedBrands.deletedCount) {
+    //   // delete the related products from db
+    //   await Product.deleteMany({ subCategoryId: subCategory._id });
+    // }
 
     res.status(200).json({
       status: "success",
       message: "SubCategory deleted successfully",
       data: subcategory,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * @api {get} /categories/list  list all categories paginated with its subcategories
+ */
+export const listAllSubCategories: RequestHandler = async (req, res, next) => {
+  const limit = parseInt(req.query.limit as string) || 4;
+  const page = parseInt(req.query.page as string) || 1;
+  const skip = (page - 1) * limit;
+  try {
+    const subcategories = await SubCategoryModel.paginate(
+      {},
+      {
+        page,
+        limit,
+        skip,
+        select: "_id name slug customId",
+        populate: {
+          path: "brandsId",
+          select: "_id name slug customId",
+        },
+      }
+    );
+
+    // send the response
+    res.status(200).json({
+      status: "success",
+      message: "categories list",
+      data: subcategories,
     });
   } catch (error) {
     next(error);

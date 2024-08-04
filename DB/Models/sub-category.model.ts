@@ -1,6 +1,8 @@
-import { Schema, Document, model } from "mongoose";
+import mongoose from "../global-setup";
 import slugify from "slugify";
 import { ISubCategory } from "../../types";
+
+const { Schema, model } = mongoose;
 
 const SubCategorySchema = new Schema<ISubCategory>(
   {
@@ -33,13 +35,16 @@ const SubCategorySchema = new Schema<ISubCategory>(
       ref: "Category",
       required: true,
     },
+
+    brandsId: [{ type: Schema.Types.ObjectId, ref: "Brand" }],
   },
   { timestamps: true }
 );
 
-export type ISubCategorySchema = Document & ISubCategory;
+export type ISubCategorySchema = mongoose.Document & ISubCategory;
 
-export const SubCategoryModel = model<ISubCategorySchema>(
-  "SubCategory",
-  SubCategorySchema
-);
+export const SubCategoryModel =
+  model<ISubCategorySchema, mongoose.PaginateModel<ISubCategorySchema>>(
+    "SubCategory",
+    SubCategorySchema
+  ) || mongoose.models.SubCategoryModel;

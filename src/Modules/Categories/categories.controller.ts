@@ -5,10 +5,14 @@ import { nanoid } from "nanoid";
 // utils
 import { cloudinaryConfig, env, uploadFile } from "../../Utils";
 // models
-import { CategoryModel, SubCategoryModel } from "../../../DB/Models";
+import {
+  BrandModel,
+  CategoryModel,
+  SubCategoryModel,
+} from "../../../DB/Models";
 
 /**
- * @api {POST} /categories/create create a new category
+ * @api {POST} /categories/create  create a new category
  */
 export const createCategory: RequestHandler = async (req, res, next) => {
   // destructuring the request body
@@ -51,7 +55,7 @@ export const createCategory: RequestHandler = async (req, res, next) => {
 };
 
 /**
- * @api {GET} /categories Get category by name or id or slug
+ * @api {GET} /categories  Get category by name or id or slug
  */
 export const getCategory: RequestHandler = async (req, res, next) => {
   const { id, name, slug } = req.query;
@@ -133,7 +137,7 @@ export const updateCategory: RequestHandler = async (req, res, next) => {
 };
 
 /**
- * @api {DELETE} /categories/delete/:_id delete a specific category
+ * @api {DELETE} /categories/delete/:_id  delete a specific category
  */
 export const deleteCategory: RequestHandler = async (req, res, next) => {
   const { _id } = req.params;
@@ -156,11 +160,53 @@ export const deleteCategory: RequestHandler = async (req, res, next) => {
     const deletedSubCategories = await SubCategoryModel.deleteMany({
       categoryId: _id,
     });
+    // check if subcategories are deleted already
+    if (deletedSubCategories.deletedCount) {
+      // delete the related brands from db
+      await BrandModel.deleteMany({ categoryId: _id });
+      // if (deletedBrands.deletedCount) {
+      //   // delete the related products from db
+      //   await Product.deleteMany({ categoryId: _id });
+      // }
+    }
 
     res.status(200).json({
       status: "success",
       message: "Category deleted successfully",
       data: category,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * @api {get} /categories/list  list all categories paginated with its subcategories
+ */
+export const listAllCategories: RequestHandler = async (req, res, next) => {
+  const limit = parseInt(req.query.limit as string) || 4;
+  const page = parseInt(req.query.page as string) || 1;
+  const skip = (page - 1) * limit;
+  try {
+    const categories = await CategoryModel.paginate(
+      {},
+      {
+        page,
+        limit,
+        skip,
+        select: "_id name slug customId",
+        populate: {
+          path: "subCategoriesId",
+          select: "_id name slug customId",
+        },
+      }
+    );
+
+    // send the response
+    res.status(200).json({
+      status: "success",
+      message: "categories list",
+      data: categories,
     });
   } catch (error) {
     next(error);

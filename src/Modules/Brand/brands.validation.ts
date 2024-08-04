@@ -1,7 +1,12 @@
 import Joi from "joi";
 import { objectIdRule } from "../../Utils";
 
-export const createCategorySchema = {
+export const createBrandSchema = {
+  query: Joi.object({
+    subcategoryId: Joi.string().custom(objectIdRule),
+    categoryId: Joi.string().custom(objectIdRule),
+  }).required(),
+
   body: Joi.object({
     name: Joi.string()
       .pattern(/^([A-Z]|[a-z]){3,}((\s+|\W|_)\w+)*$/)
@@ -13,7 +18,7 @@ export const createCategorySchema = {
   }),
 };
 
-export const getCategorySchema = {
+export const getBrandSchema = {
   query: Joi.object({
     name: Joi.string(),
 
@@ -23,7 +28,7 @@ export const getCategorySchema = {
   }).optional(),
 };
 
-export const updateCategorySchema = {
+export const updateBrandSchema = {
   body: Joi.object({
     name: Joi.string()
       .pattern(/^([A-Z]|[a-z]){3,}((\s+|\W|_)\w+)*$/)
@@ -39,24 +44,13 @@ export const updateCategorySchema = {
   }),
 };
 
-export const deleteCategorySchema = {
-  params: updateCategorySchema.params,
+export const deleteBrandSchema = {
+  params: updateBrandSchema.params,
 };
 
-export const PaginationSchema = {
+export const relevantBrandsSchema = {
   query: Joi.object({
-    page: Joi.string()
-      .pattern(/^(. *[^0-9]|)(1000|[1-9]\d{0,2})([^0-9]. *|)$/)
-      .messages({
-        "string.pattern.base": "Page Must Be A Valid Number",
-        "any.required": "Page Query Is Required",
-      }),
-
-    limit: Joi.string()
-      .pattern(/^(. *[^0-9]|)(1000|[1-9]\d{0,2})([^0-9]. *|)$/)
-      .messages({
-        "string.pattern.base": "limit Must Be A Valid Number",
-        "any.required": "itemsPerPage Query Is Required",
-      }),
+    subcategoryId: Joi.string().custom(objectIdRule),
+    categoryId: Joi.string().custom(objectIdRule),
   }).optional(),
 };

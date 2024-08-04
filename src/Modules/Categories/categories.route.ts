@@ -14,13 +14,15 @@ import {
   createCategory,
   deleteCategory,
   getCategory,
+  listAllCategories,
   updateCategory,
 } from "./categories.controller";
 // validation
 import {
   createCategorySchema,
-  deletedCategorySchema,
+  deleteCategorySchema,
   getCategorySchema,
+  PaginationSchema,
   updateCategorySchema,
 } from "./categories.validation";
 
@@ -47,8 +49,13 @@ categoryRouter.put(
 
 categoryRouter.delete(
   "/delete/:_id",
-  validationMiddleware(deletedCategorySchema),
+  validationMiddleware(deleteCategorySchema),
   deleteCategory
 );
 
+categoryRouter.get(
+  "/list",
+  validationMiddleware(PaginationSchema),
+  listAllCategories
+);
 export { categoryRouter };

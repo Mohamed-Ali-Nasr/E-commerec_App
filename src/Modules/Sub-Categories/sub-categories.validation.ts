@@ -19,12 +19,7 @@ export const createSubCategorySchema = {
 
 export const getSubCategorySchema = {
   query: Joi.object({
-    name: Joi.string()
-      .pattern(/^([A-Z]|[a-z]){3,}((\s+|\W|_)\w+)*$/)
-      .messages({
-        "string.pattern.base":
-          "Category Name Must Start With At Least Three Alphabet Letters",
-      }),
+    name: Joi.string(),
 
     slug: Joi.string(),
 
@@ -48,6 +43,6 @@ export const updateSubCategorySchema = {
   }),
 };
 
-export const deletedSubCategorySchema = {
+export const deleteSubCategorySchema = {
   params: updateSubCategorySchema.params,
 };

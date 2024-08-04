@@ -1,10 +1,10 @@
 import mongoose from "../global-setup";
 import slugify from "slugify";
-import { ICategory } from "../../types";
+import { IBrand } from "../../types";
 
 const { Schema, model } = mongoose;
 
-const CategorySchema = new Schema<ICategory>(
+const BrandSchema = new Schema<IBrand>(
   {
     name: { type: String, required: true, trim: true, unique: true },
 
@@ -23,22 +23,27 @@ const CategorySchema = new Schema<ICategory>(
       required: false, // TODO: Change to true after adding authentication
     },
 
-    Images: {
+    logo: {
       secure_url: { type: String, required: true },
       public_id: { type: String, required: true, unique: true },
     },
 
     customId: { type: String, required: true, unique: true },
 
-    subCategoriesId: [{ type: Schema.Types.ObjectId, ref: "SubCategory" }],
+    categoryId: {
+      type: Schema.Types.ObjectId,
+      ref: "Category",
+      required: true,
+    },
+
+    subcategoryId: {
+      type: Schema.Types.ObjectId,
+      ref: "SubCategory",
+      required: true,
+    },
   },
   { timestamps: true }
 );
 
-export type ICategorySchema = mongoose.Document & ICategory;
-
-export const CategoryModel =
-  model<ICategorySchema, mongoose.PaginateModel<ICategorySchema>>(
-    "Category",
-    CategorySchema
-  ) || mongoose.models.CategoryModel;
+export const BrandModel =
+  model("Brand", BrandSchema) || mongoose.models.BrandModel;

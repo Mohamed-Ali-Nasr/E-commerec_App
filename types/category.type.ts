@@ -1,4 +1,5 @@
 import { Document, ObjectId } from "mongoose";
+import { ISubCategory } from "./sub-category.type";
 
 export interface ICategory extends Document {
   _id: string;
@@ -10,4 +11,5 @@ export interface ICategory extends Document {
     public_id: string;
   };
   customId: string;
+  subCategoriesId: string[] | ISubCategory[];
 }

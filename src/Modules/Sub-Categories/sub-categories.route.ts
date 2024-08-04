@@ -14,14 +14,17 @@ import {
   createSubCategory,
   deleteSubCategory,
   getSubCategory,
+  listAllSubCategories,
   updateSubCategory,
 } from "./sub-categories.controller";
+// validations
 import {
   createSubCategorySchema,
-  deletedSubCategorySchema,
+  deleteSubCategorySchema,
   getSubCategorySchema,
   updateSubCategorySchema,
 } from "./sub-categories.validation";
+import { PaginationSchema } from "../Categories/categories.validation";
 
 const subCategoryRouter = Router();
 
@@ -50,8 +53,14 @@ subCategoryRouter.put(
 
 subCategoryRouter.delete(
   "/delete/:_id",
-  validationMiddleware(deletedSubCategorySchema),
+  validationMiddleware(deleteSubCategorySchema),
   deleteSubCategory
+);
+
+subCategoryRouter.get(
+  "/list",
+  validationMiddleware(PaginationSchema),
+  listAllSubCategories
 );
 
 export { subCategoryRouter };
