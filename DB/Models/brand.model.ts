@@ -41,6 +41,8 @@ const BrandSchema = new Schema<IBrand>(
       ref: "SubCategory",
       required: true,
     },
+
+    productsId: [{ type: Schema.Types.ObjectId, ref: "Product" }],
   },
   { timestamps: true }
 );

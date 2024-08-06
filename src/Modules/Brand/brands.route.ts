@@ -2,6 +2,7 @@ import { Router } from "express";
 // middlewares
 import {
   getDocumentByName,
+  handleMulterError,
   multerHost,
   validationMiddleware,
 } from "../../Middlewares";
@@ -14,6 +15,7 @@ import {
   createBrand,
   deleteBrand,
   getBrand,
+  listAllBrands,
   relevantBrands,
   updateBrand,
 } from "./brands.controller";
@@ -32,6 +34,7 @@ const brandRouter = Router();
 brandRouter.post(
   "/create",
   multerHost({ allowedExtensions: extensions.Images }).single("image"),
+  handleMulterError,
   validationMiddleware(createBrandSchema),
   getDocumentByName(BrandModel),
   createBrand
@@ -42,6 +45,7 @@ brandRouter.get("/", validationMiddleware(getBrandSchema), getBrand);
 brandRouter.put(
   "/update/:_id",
   multerHost({ allowedExtensions: extensions.Images }).single("image"),
+  handleMulterError,
   validationMiddleware(updateBrandSchema),
   getDocumentByName(BrandModel),
   updateBrand
@@ -58,5 +62,7 @@ brandRouter.get(
   validationMiddleware(relevantBrandsSchema),
   relevantBrands
 );
+
+brandRouter.get("/list", listAllBrands);
 
 export { brandRouter };

@@ -5,7 +5,7 @@ import { nanoid } from "nanoid";
 // utils
 import { cloudinaryConfig, env, uploadFile } from "../../Utils";
 // models
-import { BrandModel, SubCategoryModel } from "../../../DB/Models";
+import { BrandModel, ProductModel, SubCategoryModel } from "../../../DB/Models";
 // types
 import { ICategory, ISubCategory } from "../../../types";
 
@@ -117,19 +117,11 @@ export const updateBrand: RequestHandler = async (req, res, next) => {
 
   try {
     // find the brand by id
-    const brand = await BrandModel.findById(_id)
-      .populate([
-        {
-          path: "categoryId",
-          select: "_id name slug customId",
-        },
-      ])
-      .populate([
-        {
-          path: "subcategoryId",
-          select: "_id name slug customId",
-        },
-      ]);
+    const brand = await BrandModel.findById(_id).populate([
+      { path: "categoryId", select: "_id name slug customId" },
+      { path: "subcategoryId", select: "_id name slug customId" },
+    ]);
+
     if (!brand) {
       throw createHttpError(404, "Brand not found");
     }
@@ -182,19 +174,10 @@ export const deleteBrand: RequestHandler = async (req, res, next) => {
 
   try {
     // find brand and delete
-    const brand = await BrandModel.findByIdAndDelete(_id)
-      .populate([
-        {
-          path: "categoryId",
-          select: "_id name slug customId",
-        },
-      ])
-      .populate([
-        {
-          path: "subcategoryId",
-          select: "_id name slug customId",
-        },
-      ]);
+    const brand = await BrandModel.findByIdAndDelete(_id).populate([
+      { path: "categoryId", select: "_id name slug customId" },
+      { path: "subcategoryId", select: "_id name slug customId" },
+    ]);
 
     // check if deleted brand exists in the database
     if (!brand) {
@@ -211,10 +194,7 @@ export const deleteBrand: RequestHandler = async (req, res, next) => {
     await cloudinaryConfig().api.delete_folder(brandPath);
 
     // delete the related product from db
-    /**
-     * @todo  delete the related products from db
-     * await Product.deleteMany({ brandId: brand._id });
-     */
+    await ProductModel.deleteMany({ brandId: brand._id });
 
     res.status(200).json({
       status: "success",
@@ -246,6 +226,32 @@ export const relevantBrands: RequestHandler = async (req, res, next) => {
     res.status(200).json({
       status: "success",
       message: "Brands found ",
+      data: brands,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * @api {get} /brands/list  List all brands with its products
+ */
+export const listAllBrands: RequestHandler = async (req, res, next) => {
+  try {
+    const brands = await BrandModel.find()
+      .select("_id name slug customId logo")
+      .populate([
+        {
+          path: "productsId",
+          select:
+            "-Images --specs -categoryId -subcategoryId -brandId -overview",
+        },
+      ]);
+
+    // send the response
+    res.status(200).json({
+      status: "success",
+      message: "brands list",
       data: brands,
     });
   } catch (error) {
