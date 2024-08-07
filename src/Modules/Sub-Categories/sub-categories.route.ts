@@ -2,6 +2,7 @@ import { Router } from "express";
 // middlewares
 import {
   getDocumentByName,
+  handleMulterError,
   multerHost,
   validationMiddleware,
 } from "../../Middlewares";
@@ -32,6 +33,7 @@ const subCategoryRouter = Router();
 subCategoryRouter.post(
   "/create",
   multerHost({ allowedExtensions: extensions.Images }).single("image"),
+  handleMulterError,
   validationMiddleware(createSubCategorySchema),
   getDocumentByName(SubCategoryModel),
   createSubCategory
@@ -46,6 +48,7 @@ subCategoryRouter.get(
 subCategoryRouter.put(
   "/update/:_id",
   multerHost({ allowedExtensions: extensions.Images }).single("image"),
+  handleMulterError,
   validationMiddleware(updateSubCategorySchema),
   getDocumentByName(SubCategoryModel),
   updateSubCategory

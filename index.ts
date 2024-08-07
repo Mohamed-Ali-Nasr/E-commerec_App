@@ -6,7 +6,12 @@ import morgan from "morgan";
 import { env } from "./src/Utils";
 import db_connection from "./DB/connection";
 import { globalResponse } from "./src/Middlewares";
-import { brandRouter, categoryRouter, subCategoryRouter } from "./src/Modules";
+import {
+  brandRouter,
+  categoryRouter,
+  subCategoryRouter,
+  productRouter,
+} from "./src/Modules";
 
 /* Configuration and Middlewares */
 const app = express();
@@ -28,6 +33,7 @@ db_connection();
 app.use("/categories", categoryRouter);
 app.use("/sub-categories", subCategoryRouter);
 app.use("/brands", brandRouter);
+app.use("/products", productRouter);
 
 /* Error Handling */
 app.use((req, res, next) => {

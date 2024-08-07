@@ -12,6 +12,6 @@ export interface ISubCategory extends Document {
     public_id: string;
   };
   customId: string;
-  categoryId: ObjectId | ICategory;
+  categoryId: string | ICategory;
   brandsId: string[] | IBrand[];
 }
