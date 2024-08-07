@@ -8,6 +8,7 @@ import { cloudinaryConfig, env, uploadFile } from "../../Utils";
 import {
   BrandModel,
   CategoryModel,
+  ProductModel,
   SubCategoryModel,
 } from "../../../DB/Models";
 // types
@@ -186,14 +187,13 @@ export const deleteSubCategory: RequestHandler = async (req, res, next) => {
     await cloudinaryConfig().api.delete_folder(subcategoryPath);
 
     // delete the related brands from db
-    await BrandModel.deleteMany({
+    const deletedBrands = await BrandModel.deleteMany({
       subcategoryId: subcategory._id,
     });
-    // if (deletedBrands.deletedCount) {
-    //   // delete the related products from db
-    //   await Product.deleteMany({ subCategoryId: subCategory._id });
-    // }
-
+    if (deletedBrands.deletedCount) {
+      // delete the related products from db
+      await ProductModel.deleteMany({ subcategoryId: subcategory._id });
+    }
     res.status(200).json({
       status: "success",
       message: "SubCategory deleted successfully",

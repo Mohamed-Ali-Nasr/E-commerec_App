@@ -1,6 +1,7 @@
 import { Document, ObjectId } from "mongoose";
 import { ICategory } from "./category.type";
 import { ISubCategory } from "./sub-category.type";
+import { IProduct } from "./product.type";
 
 export interface IBrand extends Document {
   _id: string;
@@ -12,6 +13,7 @@ export interface IBrand extends Document {
     public_id: string;
   };
   customId: string;
-  categoryId: ObjectId | ICategory;
-  subcategoryId: ObjectId | ISubCategory;
+  categoryId: string | ICategory;
+  subcategoryId: string | ISubCategory;
+  productsId: string[] | IProduct[];
 }
