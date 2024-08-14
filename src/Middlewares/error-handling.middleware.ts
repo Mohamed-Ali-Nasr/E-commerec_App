@@ -14,5 +14,6 @@ export const globalResponse = (
     statusCode = error.status;
     errorMessage = error.message;
   }
+
   res.status(statusCode).json({ error: errorMessage });
 };

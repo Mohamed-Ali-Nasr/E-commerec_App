@@ -20,7 +20,7 @@ const BrandSchema = new Schema<IBrand>(
     createdBy: {
       type: Schema.Types.ObjectId,
       ref: "User",
-      required: false, // TODO: Change to true after adding authentication
+      required: true,
     },
 
     logo: {
@@ -46,5 +46,17 @@ const BrandSchema = new Schema<IBrand>(
   { timestamps: true }
 );
 
+// apply query middleware on brand model after delete operation to delete all related models
+BrandSchema.post("findOneAndDelete", async function (_, next) {
+  const _id = this.getQuery()._id;
+
+  // delete the related product from db
+  await mongoose.models.Product.deleteMany({ brandId: _id });
+
+  next();
+});
+
+export type IBrandSchema = mongoose.Document & IBrand;
+
 export const BrandModel =
-  model("Brand", BrandSchema) || mongoose.models.BrandModel;
+  model<IBrandSchema>("Brand", BrandSchema) || mongoose.models.Brand;

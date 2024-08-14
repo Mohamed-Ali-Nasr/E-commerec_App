@@ -1,21 +1,26 @@
 import slugify from "slugify";
-import { RequestHandler } from "express";
+import { NextFunction, RequestHandler, Response } from "express";
 import createHttpError from "http-errors";
 import { nanoid } from "nanoid";
 // utils
 import { cloudinaryConfig, env, uploadFile } from "../../Utils";
 // models
-import { BrandModel, SubCategoryModel, ProductModel } from "../../../DB/Models";
+import { BrandModel, SubCategoryModel } from "../../../DB/Models";
 // types
-import { ICategory, ISubCategory } from "../../../types";
+import { ICategory, IRequest, ISubCategory } from "../../../types";
 
 /**
  * @api {post} /brands/create  Create a brand
  */
-export const createBrand: RequestHandler = async (req, res, next) => {
+export const createBrand = async (
+  req: IRequest,
+  res: Response,
+  next: NextFunction
+) => {
   // destructuring the request body
   const { name } = req.body;
   const { categoryId, subcategoryId } = req.query;
+  const { userId } = req;
   try {
     // check if the category and subcategory are exist
     const subcategory = await SubCategoryModel.findOne({
@@ -53,6 +58,7 @@ export const createBrand: RequestHandler = async (req, res, next) => {
         public_id,
       },
       customId,
+      createdBy: userId,
       categoryId: (subcategory.categoryId as ICategory)._id,
       subcategoryId: subcategory._id,
     };
@@ -173,7 +179,7 @@ export const deleteBrand: RequestHandler = async (req, res, next) => {
 
   try {
     // find brand and delete
-    const brand = await BrandModel.findByIdAndDelete(_id).populate([
+    const brand = await BrandModel.findOneAndDelete({ _id }).populate([
       { path: "categoryId", select: "_id name slug customId" },
       { path: "subcategoryId", select: "_id name slug customId" },
     ]);
@@ -192,8 +198,14 @@ export const deleteBrand: RequestHandler = async (req, res, next) => {
     await cloudinaryConfig().api.delete_resources_by_prefix(brandPath);
     await cloudinaryConfig().api.delete_folder(brandPath);
 
-    // delete the related product from db
-    await ProductModel.deleteMany({ brandId: brand._id });
+    // Delete This Brands From brandsId Array In subcategory Model =>
+    const subcategory = await SubCategoryModel.findById(
+      (brand.subcategoryId as ISubCategory)._id
+    );
+    subcategory!.brandsId = (subcategory?.brandsId as string[]).filter(
+      (id) => id.toString() !== _id
+    );
+    await subcategory?.save();
 
     res.status(200).json({
       status: "success",

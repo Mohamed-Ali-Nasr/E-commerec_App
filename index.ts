@@ -12,6 +12,7 @@ import {
   subCategoryRouter,
   productRouter,
 } from "./src/Modules";
+import { userRouter } from "./src/Modules/User/users.route";
 
 /* Configuration and Middlewares */
 const app = express();
@@ -34,6 +35,7 @@ app.use("/categories", categoryRouter);
 app.use("/sub-categories", subCategoryRouter);
 app.use("/brands", brandRouter);
 app.use("/products", productRouter);
+app.use("/users", userRouter);
 
 /* Error Handling */
 app.use((req, res, next) => {

@@ -1,13 +1,14 @@
-import { Document, ObjectId } from "mongoose";
+import { Document } from "mongoose";
 import { ICategory } from "./category.type";
 import { ISubCategory } from "./sub-category.type";
 import { IProduct } from "./product.type";
+import { IUser } from "./user.type";
 
 export interface IBrand extends Document {
   _id: string;
   name: string;
   slug: string;
-  createdBy: ObjectId;
+  createdBy: string | IUser;
   logo: {
     secure_url: string;
     public_id: string;
