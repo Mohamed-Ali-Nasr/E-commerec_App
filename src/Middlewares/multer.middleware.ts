@@ -38,23 +38,23 @@ export const handleMulterError = (
   res: Response,
   next: NextFunction
 ) => {
-  if (err.code === "LIMIT_UNEXPECTED_FILE" && err.field === "image") {
-    // Handle the file count limit error
-    throw createHttpError(
-      400,
-      "Too many files were uploaded, please upload only 5 images at a time."
-    );
-  } else if (err.code === "LIMIT_FILE_SIZE") {
-    // Handle the file size limit error
-    throw createHttpError(
-      400,
-      "File size exceeds the limit, please upload files smaller than 5MB."
-    );
+  if (err instanceof MulterError) {
+    if (err.code === "LIMIT_UNEXPECTED_FILE" && err.field === "image") {
+      // Handle the file count limit error
+      next(createHttpError(400, "Too many files were uploaded"));
+    } else if (err.code === "LIMIT_FILE_SIZE") {
+      // Handle the file size limit error
+      next(createHttpError(400, "Files size exceeds the limit"));
+    } else {
+      // Handle other Multer errors
+      next(
+        createHttpError(
+          500,
+          "An unexpected error occurred during the file upload."
+        )
+      );
+    }
   } else {
-    // Handle other Multer errors
-    throw createHttpError(
-      500,
-      "An unexpected error occurred during the file upload."
-    );
+    next(err);
   }
 };

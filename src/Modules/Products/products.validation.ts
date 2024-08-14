@@ -1,5 +1,5 @@
 import Joi from "joi";
-import { objectIdRule } from "../../Utils";
+import { Badges, DiscountType, objectIdRule } from "../../Utils";
 
 export const addProductSchema = {
   query: Joi.object({
@@ -14,7 +14,9 @@ export const addProductSchema = {
     specs: Joi.string().optional(),
     price: Joi.number().required(),
     discountAmount: Joi.number().optional(),
-    discountType: Joi.string().valid("Percentage", "Fixed").optional(),
+    discountType: Joi.string()
+      .valid(...Object.values(DiscountType))
+      .optional(),
     stock: Joi.number().required(),
   }),
 };
@@ -30,8 +32,8 @@ export const updateProductSchema = {
     specs: Joi.string(),
     price: Joi.number(),
     discountAmount: Joi.number(),
-    discountType: Joi.string().valid("Percentage", "Fixed"),
-    badge: Joi.string().valid("New", "Sale", "Best Seller"),
+    discountType: Joi.string().valid(...Object.values(DiscountType)),
+    badge: Joi.string().valid(...Object.values(Badges)),
     stock: Joi.number(),
     publicImageIds: Joi.string(),
   }).optional(),

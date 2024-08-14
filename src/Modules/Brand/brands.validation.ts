@@ -13,7 +13,7 @@ export const createBrandSchema = {
       .required()
       .messages({
         "string.pattern.base":
-          "Category Name Must Start With At Least Three Alphabet Letters",
+          "Brand Name Must Start With At Least Three Alphabet Letters",
       }),
   }),
 };
@@ -34,7 +34,7 @@ export const updateBrandSchema = {
       .pattern(/^([A-Z]|[a-z]){3,}((\s+|\W|_)\w+)*$/)
       .messages({
         "string.pattern.base":
-          "Category Name Must Start With At Least Three Alphabet Letters",
+          "Brand Name Must Start With At Least Three Alphabet Letters",
       })
       .optional(),
   }),

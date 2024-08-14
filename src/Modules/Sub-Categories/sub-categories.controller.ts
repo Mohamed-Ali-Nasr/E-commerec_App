@@ -1,26 +1,26 @@
 import slugify from "slugify";
-import { RequestHandler } from "express";
+import { NextFunction, RequestHandler, Response } from "express";
 import createHttpError from "http-errors";
 import { nanoid } from "nanoid";
 // utils
 import { cloudinaryConfig, env, uploadFile } from "../../Utils";
 // models
-import {
-  BrandModel,
-  CategoryModel,
-  ProductModel,
-  SubCategoryModel,
-} from "../../../DB/Models";
+import { CategoryModel, SubCategoryModel } from "../../../DB/Models";
 // types
-import { ICategory } from "../../../types";
+import { ICategory, IRequest } from "../../../types";
 
 /**
  * @api {POST} /sub-categories/create  create a new subCategory
  */
-export const createSubCategory: RequestHandler = async (req, res, next) => {
+export const createSubCategory = async (
+  req: IRequest,
+  res: Response,
+  next: NextFunction
+) => {
   // destructuring the request body
   const { name } = req.body;
   const { categoryId } = req.query;
+  const { userId } = req;
   try {
     // find the category by id
     const category = await CategoryModel.findById(categoryId);
@@ -48,6 +48,7 @@ export const createSubCategory: RequestHandler = async (req, res, next) => {
         public_id,
       },
       customId,
+      createdBy: userId,
       categoryId: category._id,
     };
 
@@ -55,13 +56,13 @@ export const createSubCategory: RequestHandler = async (req, res, next) => {
     const newSubCategory = await SubCategoryModel.create(subCategory);
 
     // Push the id of new subcategory to subcategories id Array in Category Model
-    (category?.subCategoriesId as string[]).push(newSubCategory._id);
+    (category?.subcategoriesId as string[]).push(newSubCategory._id);
     await category?.save();
 
     // send the response
     res.status(201).json({
       status: "success",
-      message: "Sub-Category created successfully",
+      message: "SubCategory created successfully",
       data: newSubCategory,
     });
   } catch (error) {
@@ -151,7 +152,7 @@ export const updateSubCategory: RequestHandler = async (req, res, next) => {
 
     res.status(200).json({
       status: "success",
-      message: "Category updated successfully",
+      message: "SubCategory updated successfully",
       data: subcategory,
     });
   } catch (error) {
@@ -167,7 +168,9 @@ export const deleteSubCategory: RequestHandler = async (req, res, next) => {
 
   try {
     // find subcategory and delete
-    const subcategory = await SubCategoryModel.findByIdAndDelete(_id).populate([
+    const subcategory = await SubCategoryModel.findOneAndDelete({
+      _id,
+    }).populate([
       {
         path: "categoryId",
         select: "_id name slug customId",
@@ -186,14 +189,16 @@ export const deleteSubCategory: RequestHandler = async (req, res, next) => {
     await cloudinaryConfig().api.delete_resources_by_prefix(subcategoryPath);
     await cloudinaryConfig().api.delete_folder(subcategoryPath);
 
-    // delete the related brands from db
-    const deletedBrands = await BrandModel.deleteMany({
-      subcategoryId: subcategory._id,
-    });
-    if (deletedBrands.deletedCount) {
-      // delete the related products from db
-      await ProductModel.deleteMany({ subcategoryId: subcategory._id });
-    }
+    // Delete This subcategory From subCategoriesId Array In category Model =>
+    const category = await CategoryModel.findById(
+      (subcategory.categoryId as ICategory)._id
+    );
+    category!.subcategoriesId = (category?.subcategoriesId as string[]).filter(
+      (id) => id.toString() !== _id
+    );
+    await category?.save();
+
+    // send the response
     res.status(200).json({
       status: "success",
       message: "SubCategory deleted successfully",
@@ -205,7 +210,7 @@ export const deleteSubCategory: RequestHandler = async (req, res, next) => {
 };
 
 /**
- * @api {get} /categories/list  list all categories paginated with its subcategories
+ * @api {get} /sub-categories/list  list all categories paginated with its subcategories
  */
 export const listAllSubCategories: RequestHandler = async (req, res, next) => {
   const limit = parseInt(req.query.limit as string) || 4;
@@ -229,7 +234,7 @@ export const listAllSubCategories: RequestHandler = async (req, res, next) => {
     // send the response
     res.status(200).json({
       status: "success",
-      message: "categories list",
+      message: "SubCategories list",
       data: subcategories,
     });
   } catch (error) {

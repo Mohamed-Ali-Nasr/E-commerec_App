@@ -1,27 +1,34 @@
 import slugify from "slugify";
-import { RequestHandler } from "express";
+import { NextFunction, RequestHandler, Response } from "express";
 import createHttpError from "http-errors";
 import { nanoid } from "nanoid";
 // utils
 import {
+  ApiFeatures,
   calculateProductPrice,
   cloudinaryConfig,
   env,
+  replaceFilters,
   uploadFile,
 } from "../../Utils";
 // models
 import { BrandModel, ProductModel } from "../../../DB/Models";
 // types
-import { IBrand, ICategory, ISubCategory } from "../../../types";
+import { IBrand, ICategory, IRequest, ISubCategory } from "../../../types";
 
 /**
  * @api {post} /products/add  Add Product
  */
-export const addProduct: RequestHandler = async (req, res, next) => {
+export const addProduct = async (
+  req: IRequest,
+  res: Response,
+  next: NextFunction
+) => {
   // destructuring the request body
   const { title, overview, specs, price, discountAmount, discountType, stock } =
     req.body;
   const { categoryId, subcategoryId, brandId } = req.query;
+  const { userId } = req;
 
   try {
     // req.files
@@ -77,6 +84,7 @@ export const addProduct: RequestHandler = async (req, res, next) => {
         URLs,
         customId,
       },
+      createdBy: userId,
       categoryId: (brand.categoryId as ICategory)._id,
       subcategoryId: (brand.subcategoryId as ISubCategory)._id,
       brandId: brand._id,
@@ -234,6 +242,14 @@ export const deleteProduct: RequestHandler = async (req, res, next) => {
     await cloudinaryConfig().api.delete_resources_by_prefix(productPath);
     await cloudinaryConfig().api.delete_folder(productPath);
 
+    // Delete This Product From productsId Array In Brand Model =>
+    const brand = await BrandModel.findById((product.brandId as IBrand)._id);
+    brand!.productsId = (brand?.productsId as string[]).filter(
+      (id) => id.toString() !== productId
+    );
+    await brand?.save();
+
+    // send the response
     res.status(200).json({
       status: "success",
       message: "product deleted successfully",
@@ -248,19 +264,59 @@ export const deleteProduct: RequestHandler = async (req, res, next) => {
  * @api {get} /products/list  list all Products
  */
 export const listProducts: RequestHandler = async (req, res, next) => {
-  const limit = parseInt(req.query.limit as string) || 4;
-  const page = parseInt(req.query.page as string) || 1;
-  const skip = (page - 1) * limit;
+  const { page, limit, ...filters } = req.query;
+  const itemsPerPage = parseInt(limit as string) || 4;
+  const pageNumber = parseInt(page as string) || 1;
+  const skip = (pageNumber - 1) * itemsPerPage;
   try {
-    const products = await ProductModel.paginate(
-      {},
-      {
-        page,
-        limit,
-        skip,
-        select: "-Images --specs -categoryId -subcategoryId -brandId",
-      }
-    );
+    const { parsedFilters } = replaceFilters(filters);
+
+    /**
+     * @way 1 using find , limit , skip methods
+     */
+    const data = await ProductModel.find()
+      .limit(itemsPerPage)
+      .skip(skip)
+      .select("-Images --specs -categoryId -subcategoryId -brandId");
+
+    /**
+     * @way 2 using paginate method from mongoose-paginate-v2 as schema plugin
+     */
+    const products = await ProductModel.paginate(parsedFilters, {
+      page: pageNumber,
+      limit: itemsPerPage,
+      skip,
+      select: "-Images --specs -categoryId -subcategoryId -brandId",
+      sort: { appliedPrice: 1 },
+    });
+
+    // send the response
+    res.status(200).json({
+      status: "success",
+      message: "products list",
+      data: products,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * @api {get} /products/api-features  list all Products with Api Features class
+ */
+export const apiFeaturesProducts: RequestHandler = async (req, res, next) => {
+  try {
+    const mongooseQuery = ProductModel.find();
+    const ApiFeaturesInstance = new ApiFeatures(
+      mongooseQuery,
+      ProductModel,
+      req.query
+    )
+      .pagination()
+      .filters()
+      .sort();
+
+    const products = await ApiFeaturesInstance.mongooseQuery;
 
     // send the response
     res.status(200).json({

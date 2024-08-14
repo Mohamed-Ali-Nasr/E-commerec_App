@@ -1,7 +1,8 @@
-import { Document, ObjectId } from "mongoose";
+import { Document } from "mongoose";
 import { ICategory } from "./category.type";
 import { ISubCategory } from "./sub-category.type";
 import { IBrand } from "./brand.type";
+import { IUser } from "./user.type";
 
 export interface IProduct extends Document {
   _id: string;
@@ -22,7 +23,7 @@ export interface IProduct extends Document {
     URLs: { secure_url: string; public_id: string }[];
     customId: string;
   };
-  createdBy: ObjectId;
+  createdBy: string | IUser;
   categoryId: string | ICategory;
   subcategoryId: string | ISubCategory;
   brandId: string | IBrand;

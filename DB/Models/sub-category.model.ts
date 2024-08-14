@@ -20,7 +20,7 @@ const SubCategorySchema = new Schema<ISubCategory>(
     createdBy: {
       type: Schema.Types.ObjectId,
       ref: "User",
-      required: false, // TODO: Change to true after adding authentication
+      required: true,
     },
 
     Images: {
@@ -41,10 +41,28 @@ const SubCategorySchema = new Schema<ISubCategory>(
   { timestamps: true }
 );
 
+// apply query middleware on subcategory model after delete operation to delete all related models
+SubCategorySchema.post("findOneAndDelete", async function (_, next) {
+  const _id = this.getQuery()._id;
+
+  // delete the related brands from db
+  const deletedBrands = await mongoose.models.Brand.deleteMany({
+    subcategoryId: _id,
+  });
+  if (deletedBrands.deletedCount) {
+    // delete the related products from db
+    await mongoose.models.Product.deleteMany({
+      subcategoryId: _id,
+    });
+  }
+
+  next();
+});
+
 export type ISubCategorySchema = mongoose.Document & ISubCategory;
 
 export const SubCategoryModel =
   model<ISubCategorySchema, mongoose.PaginateModel<ISubCategorySchema>>(
     "SubCategory",
     SubCategorySchema
-  ) || mongoose.models.SubCategoryModel;
+  ) || mongoose.models.SubCategory;

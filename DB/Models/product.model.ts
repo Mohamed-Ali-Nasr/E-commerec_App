@@ -56,7 +56,7 @@ const ProductSchema = new Schema<IProduct>(
     createdBy: {
       type: Schema.Types.ObjectId,
       ref: "User",
-      required: false,
+      required: true,
     },
     categoryId: {
       type: Schema.Types.ObjectId,
@@ -83,4 +83,4 @@ export const ProductModel =
   model<IProductSchema, mongoose.PaginateModel<IProductSchema>>(
     "Product",
     ProductSchema
-  ) || mongoose.models.ProductModel;
+  ) || mongoose.models.Product;

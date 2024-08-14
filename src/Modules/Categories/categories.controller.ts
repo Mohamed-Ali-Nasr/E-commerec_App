@@ -1,23 +1,25 @@
 import slugify from "slugify";
-import { RequestHandler } from "express";
+import { NextFunction, RequestHandler, Response } from "express";
 import createHttpError from "http-errors";
 import { nanoid } from "nanoid";
 // utils
 import { cloudinaryConfig, env, uploadFile } from "../../Utils";
 // models
-import {
-  BrandModel,
-  CategoryModel,
-  ProductModel,
-  SubCategoryModel,
-} from "../../../DB/Models";
+import { CategoryModel } from "../../../DB/Models";
+// types
+import { IRequest } from "../../../types";
 
 /**
  * @api {POST} /categories/create  create a new category
  */
-export const createCategory: RequestHandler = async (req, res, next) => {
+export const createCategory = async (
+  req: IRequest,
+  res: Response,
+  next: NextFunction
+) => {
   // destructuring the request body
   const { name } = req.body;
+  const { userId } = req;
   try {
     // Image
     if (!req.file) {
@@ -39,6 +41,7 @@ export const createCategory: RequestHandler = async (req, res, next) => {
         public_id,
       },
       customId,
+      createdBy: userId,
     };
 
     // create the category in db
@@ -145,7 +148,7 @@ export const deleteCategory: RequestHandler = async (req, res, next) => {
 
   try {
     // find category and delete
-    const category = await CategoryModel.findByIdAndDelete(_id);
+    const category = await CategoryModel.findOneAndDelete({ _id });
 
     // check if deleted category exists in the database
     if (!category) {
@@ -156,21 +159,6 @@ export const deleteCategory: RequestHandler = async (req, res, next) => {
     const categoryPath = `${env.UPLOADS_FOLDER}/Categories/${category?.customId}`;
     await cloudinaryConfig().api.delete_resources_by_prefix(categoryPath);
     await cloudinaryConfig().api.delete_folder(categoryPath);
-
-    // delete related subcategories from db
-    const deletedSubCategories = await SubCategoryModel.deleteMany({
-      categoryId: _id,
-    });
-    // check if subcategories are deleted already
-    if (deletedSubCategories.deletedCount) {
-      // delete the related brands from db
-      await BrandModel.deleteMany({ categoryId: _id });
-      const deletedBrands = await BrandModel.deleteMany({ categoryId: _id });
-      if (deletedBrands.deletedCount) {
-        // delete the related products from db
-        await ProductModel.deleteMany({ categoryId: _id });
-      }
-    }
 
     res.status(200).json({
       status: "success",
