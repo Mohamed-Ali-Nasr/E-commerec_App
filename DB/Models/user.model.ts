@@ -34,8 +34,6 @@ const UserSchema = new Schema<IUser>(
 
 // apply document middleware on user model by hashing password before save in database
 UserSchema.pre("save", async function (next) {
-  console.log(this.isModified("password"));
-
   if (this.isModified("password")) {
     const salt = await bcrypt.genSalt(env.SALT_ROUNDS);
     this.password = await bcrypt.hash(this.password, salt);

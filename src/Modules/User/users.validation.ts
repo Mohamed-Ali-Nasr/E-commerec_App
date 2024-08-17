@@ -1,7 +1,7 @@
 import Joi from "joi";
 import { gender, userRole } from "../../Utils";
 
-export const signupSchema = {
+export const signup = {
   body: Joi.object({
     username: Joi.string()
       .pattern(/^([A-Z]|[a-z]){3,}((\s+|\W|_)\w+)*$/)
@@ -39,16 +39,22 @@ export const signupSchema = {
     gender: Joi.string()
       .valid(...Object.values(gender))
       .required(),
+    country: Joi.string().required(),
+    city: Joi.string().required(),
+    postalCode: Joi.number().required(),
+    buildingNumber: Joi.number().required(),
+    floorNumber: Joi.number().required(),
+    addressLabel: Joi.string().optional(),
   }),
 };
 
-export const verifyEmailSchema = {
+export const verifyEmail = {
   params: Joi.object({
     token: Joi.string().required(),
   }),
 };
 
-export const signinSchema = {
+export const signin = {
   body: Joi.object({
     email: Joi.string().email().required(),
 
@@ -56,7 +62,7 @@ export const signinSchema = {
   }),
 };
 
-export const updatePasswordSchema = {
+export const updatePassword = {
   body: Joi.object({
     password: Joi.string()
       .pattern(
@@ -70,13 +76,13 @@ export const updatePasswordSchema = {
   }),
 };
 
-export const forgetPasswordSchema = {
+export const forgetPassword = {
   body: Joi.object({
     email: Joi.string().email().required(),
   }),
 };
 
-export const resetPasswordSchema = {
+export const resetPassword = {
   body: Joi.object({
     newPassword: Joi.string()
       .pattern(
@@ -99,7 +105,7 @@ export const resetPasswordSchema = {
   }),
 };
 
-export const updateUserSchema = {
+export const updateUser = {
   body: Joi.object({
     username: Joi.string()
       .pattern(/^([A-Z]|[a-z]){3,}((\s+|\W|_)\w+)*$/)

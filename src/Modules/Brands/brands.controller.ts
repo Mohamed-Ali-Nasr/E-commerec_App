@@ -10,7 +10,7 @@ import { BrandModel, SubCategoryModel } from "../../../DB/Models";
 import { ICategory, IRequest, ISubCategory } from "../../../types";
 
 /**
- * @api {post} /brands/create  Create a brand
+ * @api {POST} /brands/create  Create a brand
  */
 export const createBrand = async (
   req: IRequest,
@@ -245,7 +245,7 @@ export const relevantBrands: RequestHandler = async (req, res, next) => {
 };
 
 /**
- * @api {get} /brands/list  List all brands with its products
+ * @api {GET} /brands/list  List all brands with its products
  */
 export const listAllBrands: RequestHandler = async (req, res, next) => {
   try {

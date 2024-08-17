@@ -5,3 +5,5 @@ export * from "./product.type";
 export * from "./user.type";
 export * from "./send-email.type";
 export * from "./user-token.type";
+export * from "./address.type";
+export * from "./cart.type";

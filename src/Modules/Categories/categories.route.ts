@@ -1,33 +1,24 @@
 import { Router } from "express";
 // middlewares
-import {
-  authMiddleware,
-  authorization,
-  getDocumentByName,
-  handleMulterError,
-  multerHost,
-  validationMiddleware,
-} from "../../Middlewares";
+import * as middleware from "../../Middlewares";
 // utils
 import { extensions, roles } from "../../Utils";
 // models
 import { CategoryModel } from "../../../DB/Models";
 // controllers
-import {
-  createCategory,
-  deleteCategory,
-  getCategory,
-  listAllCategories,
-  updateCategory,
-} from "./categories.controller";
+import * as controller from "./categories.controller";
 // validation
-import {
-  createCategorySchema,
-  deleteCategorySchema,
-  getCategorySchema,
-  PaginationSchema,
-  updateCategorySchema,
-} from "./categories.validation";
+import * as schema from "./categories.validation";
+
+// destruct all used middleware
+const {
+  validationMiddleware,
+  authMiddleware,
+  authorization,
+  getDocumentByName,
+  handleMulterError,
+  multerHost,
+} = middleware;
 
 const categoryRouter = Router();
 
@@ -38,17 +29,17 @@ categoryRouter.post(
   authorization(roles.ADMIN),
   multerHost({ allowedExtensions: extensions.Images }).single("image"),
   handleMulterError,
-  validationMiddleware(createCategorySchema),
+  validationMiddleware(schema.createCategory),
   getDocumentByName(CategoryModel),
-  createCategory
+  controller.createCategory
 );
 
 categoryRouter.get(
   "/",
   authMiddleware,
   authorization(roles.BUYER_ADMIN),
-  validationMiddleware(getCategorySchema),
-  getCategory
+  validationMiddleware(schema.getCategory),
+  controller.getCategory
 );
 
 categoryRouter.put(
@@ -57,24 +48,24 @@ categoryRouter.put(
   authorization(roles.ADMIN),
   multerHost({ allowedExtensions: extensions.Images }).single("image"),
   handleMulterError,
-  validationMiddleware(updateCategorySchema),
+  validationMiddleware(schema.updateCategory),
   getDocumentByName(CategoryModel),
-  updateCategory
+  controller.updateCategory
 );
 
 categoryRouter.delete(
   "/delete/:_id",
   authMiddleware,
   authorization(roles.ADMIN),
-  validationMiddleware(deleteCategorySchema),
-  deleteCategory
+  validationMiddleware(schema.deleteCategory),
+  controller.deleteCategory
 );
 
 categoryRouter.get(
   "/list",
   authMiddleware,
   authorization(roles.BUYER_ADMIN),
-  validationMiddleware(PaginationSchema),
-  listAllCategories
+  validationMiddleware(schema.Pagination),
+  controller.listAllCategories
 );
 export { categoryRouter };

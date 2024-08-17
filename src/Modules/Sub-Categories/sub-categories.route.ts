@@ -1,33 +1,25 @@
 import { Router } from "express";
 // middlewares
-import {
-  authMiddleware,
-  authorization,
-  getDocumentByName,
-  handleMulterError,
-  multerHost,
-  validationMiddleware,
-} from "../../Middlewares";
+import * as middleware from "../../Middlewares";
 // utils
 import { extensions, roles } from "../../Utils";
 // models
 import { SubCategoryModel } from "../../../DB/Models";
 // controllers
-import {
-  createSubCategory,
-  deleteSubCategory,
-  getSubCategory,
-  listAllSubCategories,
-  updateSubCategory,
-} from "./sub-categories.controller";
+import * as controller from "./sub-categories.controller";
 // validations
-import {
-  createSubCategorySchema,
-  deleteSubCategorySchema,
-  getSubCategorySchema,
-  updateSubCategorySchema,
-} from "./sub-categories.validation";
-import { PaginationSchema } from "../Categories/categories.validation";
+import * as schema from "./sub-categories.validation";
+import { Pagination } from "../Categories/categories.validation";
+
+// destruct all used middleware
+const {
+  authMiddleware,
+  authorization,
+  handleMulterError,
+  multerHost,
+  validationMiddleware,
+  getDocumentByName,
+} = middleware;
 
 const subCategoryRouter = Router();
 
@@ -38,17 +30,17 @@ subCategoryRouter.post(
   authorization(roles.ADMIN),
   multerHost({ allowedExtensions: extensions.Images }).single("image"),
   handleMulterError,
-  validationMiddleware(createSubCategorySchema),
+  validationMiddleware(schema.createSubCategory),
   getDocumentByName(SubCategoryModel),
-  createSubCategory
+  controller.createSubCategory
 );
 
 subCategoryRouter.get(
   "/",
   authMiddleware,
   authorization(roles.BUYER_ADMIN),
-  validationMiddleware(getSubCategorySchema),
-  getSubCategory
+  validationMiddleware(schema.getSubCategory),
+  controller.getSubCategory
 );
 
 subCategoryRouter.put(
@@ -57,25 +49,25 @@ subCategoryRouter.put(
   authorization(roles.ADMIN),
   multerHost({ allowedExtensions: extensions.Images }).single("image"),
   handleMulterError,
-  validationMiddleware(updateSubCategorySchema),
+  validationMiddleware(schema.updateSubCategory),
   getDocumentByName(SubCategoryModel),
-  updateSubCategory
+  controller.updateSubCategory
 );
 
 subCategoryRouter.delete(
   "/delete/:_id",
   authMiddleware,
   authorization(roles.ADMIN),
-  validationMiddleware(deleteSubCategorySchema),
-  deleteSubCategory
+  validationMiddleware(schema.deleteSubCategory),
+  controller.deleteSubCategory
 );
 
 subCategoryRouter.get(
   "/list",
   authMiddleware,
   authorization(roles.BUYER_ADMIN),
-  validationMiddleware(PaginationSchema),
-  listAllSubCategories
+  validationMiddleware(Pagination),
+  controller.listAllSubCategories
 );
 
 export { subCategoryRouter };

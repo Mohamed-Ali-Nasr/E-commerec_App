@@ -1,84 +1,65 @@
 import { Router } from "express";
 // middlewares
-import {
-  authMiddleware,
-  authorization,
-  validationMiddleware,
-} from "../../Middlewares";
+import * as middleware from "../../Middlewares";
 // utils
 import { roles } from "../../Utils";
 // controllers
-import {
-  forgetPassword,
-  getUserAccountData,
-  hardDeleteUser,
-  resetPassword,
-  signin,
-  signup,
-  softDeleteUser,
-  updatePassword,
-  updateUser,
-  verifyEmail,
-} from "./users.controller";
+import * as controller from "./users.controller";
 // validations
-import {
-  forgetPasswordSchema,
-  resetPasswordSchema,
-  signinSchema,
-  signupSchema,
-  updatePasswordSchema,
-  updateUserSchema,
-  verifyEmailSchema,
-} from "./users.validation";
+import * as schema from "./users.validation";
+
+// destruct all used middleware
+const { validationMiddleware, authMiddleware, authorization } = middleware;
 
 const userRouter = Router();
 
 // routes
-userRouter.post("/signup", validationMiddleware(signupSchema), signup);
+userRouter.post(
+  "/signup",
+  validationMiddleware(schema.signup),
+  controller.signup
+);
 
 userRouter.get(
   "/verify-email/:token",
-  validationMiddleware(verifyEmailSchema),
-  verifyEmail
+  validationMiddleware(schema.verifyEmail),
+  controller.verifyEmail
 );
 
-userRouter.post("/signin", validationMiddleware(signinSchema), signin);
+userRouter.post(
+  "/signin",
+  validationMiddleware(schema.signin),
+  controller.signin
+);
 
 userRouter.patch(
   "/update-password",
   authMiddleware,
-  validationMiddleware(updatePasswordSchema),
-  updatePassword
+  validationMiddleware(schema.updatePassword),
+  controller.updatePassword
 );
 
 userRouter.post(
   "/forget-password",
-  validationMiddleware(forgetPasswordSchema),
-  forgetPassword
+  validationMiddleware(schema.forgetPassword),
+  controller.forgetPassword
 );
 
 userRouter.post(
   "/reset-password",
-  validationMiddleware(resetPasswordSchema),
-  resetPassword
+  validationMiddleware(schema.resetPassword),
+  controller.resetPassword
 );
 
-userRouter.get("/user-info", authMiddleware, getUserAccountData);
+userRouter.get("/user-info", authMiddleware, controller.getUserAccountData);
 
 userRouter.put(
   "/update-user",
   authMiddleware,
-  validationMiddleware(updateUserSchema),
-  updateUser
+  validationMiddleware(schema.updateUser),
+  controller.updateUser
 );
 
-userRouter.patch("/soft-delete", authMiddleware, softDeleteUser);
-
-userRouter.delete(
-  "/hard-delete",
-  authMiddleware,
-  authorization(roles.ADMIN),
-  hardDeleteUser
-);
+userRouter.patch("/soft-delete", authMiddleware, controller.softDeleteUser);
 
 export { userRouter };

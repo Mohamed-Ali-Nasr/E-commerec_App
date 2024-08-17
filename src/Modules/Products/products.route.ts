@@ -1,28 +1,21 @@
 import { Router } from "express";
 // middlewares
-import {
+import * as middleware from "../../Middlewares";
+// utils
+import { extensions, roles } from "../../Utils";
+// controllers
+import * as controller from "./products.controller";
+// validations
+import * as schema from "./products.validation";
+
+// destruct all used middleware
+const {
   authMiddleware,
   authorization,
   handleMulterError,
   multerHost,
   validationMiddleware,
-} from "../../Middlewares";
-// utils
-import { extensions, roles } from "../../Utils";
-// controllers
-import {
-  addProduct,
-  apiFeaturesProducts,
-  deleteProduct,
-  listProducts,
-  updateProduct,
-} from "./products.controller";
-// validations
-import {
-  addProductSchema,
-  deleteProductSchema,
-  updateProductSchema,
-} from "./products.validation";
+} = middleware;
 
 const productRouter = Router();
 
@@ -33,8 +26,8 @@ productRouter.post(
   authorization(roles.ADMIN),
   multerHost({ allowedExtensions: extensions.Images }).array("image", 5),
   handleMulterError,
-  validationMiddleware(addProductSchema),
-  addProduct
+  validationMiddleware(schema.addProduct),
+  controller.addProduct
 );
 
 productRouter.put(
@@ -43,30 +36,30 @@ productRouter.put(
   authorization(roles.ADMIN),
   multerHost({ allowedExtensions: extensions.Images }).array("image", 5),
   handleMulterError,
-  validationMiddleware(updateProductSchema),
-  updateProduct
+  validationMiddleware(schema.updateProduct),
+  controller.updateProduct
 );
 
 productRouter.delete(
   "/delete/:productId",
   authMiddleware,
   authorization(roles.ADMIN),
-  validationMiddleware(deleteProductSchema),
-  deleteProduct
+  validationMiddleware(schema.deleteProduct),
+  controller.deleteProduct
 );
 
 productRouter.get(
   "/list",
   authMiddleware,
   authorization(roles.BUYER_ADMIN),
-  listProducts
+  controller.listProducts
 );
 
 productRouter.get(
   "/api-features",
   authMiddleware,
   authorization(roles.BUYER_ADMIN),
-  apiFeaturesProducts
+  controller.apiFeaturesProducts
 );
 
 export { productRouter };

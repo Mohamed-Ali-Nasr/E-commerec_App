@@ -210,7 +210,7 @@ export const deleteSubCategory: RequestHandler = async (req, res, next) => {
 };
 
 /**
- * @api {get} /sub-categories/list  list all categories paginated with its subcategories
+ * @api {GET} /sub-categories/list  list all categories paginated with its subcategories
  */
 export const listAllSubCategories: RequestHandler = async (req, res, next) => {
   const limit = parseInt(req.query.limit as string) || 4;
