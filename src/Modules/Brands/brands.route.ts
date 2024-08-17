@@ -1,34 +1,24 @@
 import { Router } from "express";
 // middlewares
-import {
-  authMiddleware,
-  authorization,
-  getDocumentByName,
-  handleMulterError,
-  multerHost,
-  validationMiddleware,
-} from "../../Middlewares";
+import * as middleware from "../../Middlewares";
 // utils
 import { extensions, roles } from "../../Utils";
 // models
 import { BrandModel } from "../../../DB/Models";
 // controllers
-import {
-  createBrand,
-  deleteBrand,
-  getBrand,
-  relevantBrands,
-  updateBrand,
-  listAllBrands,
-} from "./brands.controller";
+import * as controller from "./brands.controller";
 // validations
-import {
-  createBrandSchema,
-  deleteBrandSchema,
-  getBrandSchema,
-  relevantBrandsSchema,
-  updateBrandSchema,
-} from "./brands.validation";
+import * as schema from "./brands.validation";
+
+// destruct all used middleware
+const {
+  validationMiddleware,
+  authMiddleware,
+  authorization,
+  getDocumentByName,
+  handleMulterError,
+  multerHost,
+} = middleware;
 
 const brandRouter = Router();
 
@@ -39,17 +29,17 @@ brandRouter.post(
   authorization(roles.ADMIN),
   multerHost({ allowedExtensions: extensions.Images }).single("image"),
   handleMulterError,
-  validationMiddleware(createBrandSchema),
+  validationMiddleware(schema.createBrand),
   getDocumentByName(BrandModel),
-  createBrand
+  controller.createBrand
 );
 
 brandRouter.get(
   "/",
   authMiddleware,
   authorization(roles.BUYER_ADMIN),
-  validationMiddleware(getBrandSchema),
-  getBrand
+  validationMiddleware(schema.getBrand),
+  controller.getBrand
 );
 
 brandRouter.put(
@@ -58,27 +48,27 @@ brandRouter.put(
   authorization(roles.ADMIN),
   multerHost({ allowedExtensions: extensions.Images }).single("image"),
   handleMulterError,
-  validationMiddleware(updateBrandSchema),
+  validationMiddleware(schema.updateBrand),
   getDocumentByName(BrandModel),
-  updateBrand
+  controller.updateBrand
 );
 
 brandRouter.delete(
   "/delete/:_id",
   authMiddleware,
   authorization(roles.ADMIN),
-  validationMiddleware(deleteBrandSchema),
-  deleteBrand
+  validationMiddleware(schema.deleteBrand),
+  controller.deleteBrand
 );
 
 brandRouter.get(
   "/relevant",
   authMiddleware,
   authorization(roles.BUYER_ADMIN),
-  validationMiddleware(relevantBrandsSchema),
-  relevantBrands
+  validationMiddleware(schema.relevantBrands),
+  controller.relevantBrands
 );
 
-brandRouter.get("/list", listAllBrands);
+brandRouter.get("/list", controller.listAllBrands);
 
 export { brandRouter };

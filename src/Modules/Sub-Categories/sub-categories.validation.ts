@@ -1,7 +1,7 @@
 import Joi from "joi";
 import { objectIdRule } from "../../Utils";
 
-export const createSubCategorySchema = {
+export const createSubCategory = {
   body: Joi.object({
     name: Joi.string()
       .pattern(/^([A-Z]|[a-z]){3,}((\s+|\W|_)\w+)*$/)
@@ -17,7 +17,7 @@ export const createSubCategorySchema = {
   }),
 };
 
-export const getSubCategorySchema = {
+export const getSubCategory = {
   query: Joi.object({
     name: Joi.string(),
 
@@ -27,7 +27,7 @@ export const getSubCategorySchema = {
   }).optional(),
 };
 
-export const updateSubCategorySchema = {
+export const updateSubCategory = {
   body: Joi.object({
     name: Joi.string()
       .pattern(/^([A-Z]|[a-z]){3,}((\s+|\W|_)\w+)*$/)
@@ -43,6 +43,6 @@ export const updateSubCategorySchema = {
   }),
 };
 
-export const deleteSubCategorySchema = {
-  params: updateSubCategorySchema.params,
+export const deleteSubCategory = {
+  params: updateSubCategory.params,
 };

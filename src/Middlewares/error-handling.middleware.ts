@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import { isHttpError } from "http-errors";
 
 export const globalResponse = (
-  error: unknown,
+  error: any,
   req: Request,
   res: Response,
   next: NextFunction
@@ -13,7 +13,11 @@ export const globalResponse = (
   if (isHttpError(error)) {
     statusCode = error.status;
     errorMessage = error.message;
+    res.status(statusCode).json({ error: errorMessage });
   }
 
-  res.status(statusCode).json({ error: errorMessage });
+  res.status(statusCode).json({
+    error: errorMessage,
+    err_stack: error.stack,
+  });
 };

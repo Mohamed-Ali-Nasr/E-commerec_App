@@ -6,15 +6,29 @@ import crypto from "crypto";
 // utils
 import { env, generateOTP, generateTokens, sendEmail } from "../../Utils";
 // models
-import { UserModel } from "../../../DB/Models";
+import { AddressModel, UserModel } from "../../../DB/Models";
 // types
 import { IRequest } from "../../../types";
 
 /**
- * @api {post} /user/signup  Register a new User
+ * @api {POST} /user/signup  Register a new User
  */
 export const signup: RequestHandler = async (req, res, next) => {
-  const { username, email, password, userType, age, gender, phone } = req.body;
+  const {
+    username,
+    email,
+    password,
+    userType,
+    age,
+    gender,
+    phone,
+    country,
+    city,
+    postalCode,
+    buildingNumber,
+    floorNumber,
+    addressLabel,
+  } = req.body;
   try {
     // Check If Email Exists In Database =>
     const existingUser = await UserModel.findOne({ email });
@@ -25,7 +39,7 @@ export const signup: RequestHandler = async (req, res, next) => {
       );
     }
 
-    // prepare user object
+    // create new user instance
     const newUser = new UserModel({
       username,
       email,
@@ -34,6 +48,18 @@ export const signup: RequestHandler = async (req, res, next) => {
       age,
       gender,
       phone,
+    });
+
+    // create new Address instance
+    const newAddress = new AddressModel({
+      userId: newUser._id,
+      country,
+      city,
+      postalCode,
+      buildingNumber,
+      floorNumber,
+      addressLabel,
+      isDefault: true,
     });
 
     // Generate Token For New User =>
@@ -58,12 +84,16 @@ export const signup: RequestHandler = async (req, res, next) => {
     // Save New User To Database =>
     await newUser.save();
 
+    // Save New Address To Database =>
+    await newAddress.save();
+
     // send the response
     res.status(201).json({
       status: "success",
       message:
         "user created successfully, Please Verify your email First And Then Login Again",
-      data: newUser,
+      user: newUser,
+      address: newAddress,
     });
   } catch (error) {
     next(error);
@@ -71,7 +101,7 @@ export const signup: RequestHandler = async (req, res, next) => {
 };
 
 /**
- * @api {get} /users/verify-email/:token  verify email added when user signed up
+ * @api {GET} /users/verify-email/:token  verify email added when user signed up
  */
 export const verifyEmail: RequestHandler = async (req, res, next) => {
   const { token } = req.params;
@@ -104,7 +134,7 @@ export const verifyEmail: RequestHandler = async (req, res, next) => {
 };
 
 /**
- * @api {post} /users/signin  signin user account
+ * @api {POST} /users/signin  signin user account
  */
 export const signin: RequestHandler = async (req, res, next) => {
   const { email, password } = req.body;
@@ -146,7 +176,7 @@ export const signin: RequestHandler = async (req, res, next) => {
 };
 
 /**
- * @api {patch} /users/update-password  update password
+ * @api {PATCH} /users/update-password  update password
  */
 export const updatePassword = async (
   req: IRequest,
@@ -177,7 +207,7 @@ export const updatePassword = async (
 };
 
 /**
- * @api {post} /users/forget-password  forget password
+ * @api {POST} /users/forget-password  forget password
  */
 export const forgetPassword: RequestHandler = async (req, res, next) => {
   const { email } = req.body;
@@ -223,7 +253,7 @@ export const forgetPassword: RequestHandler = async (req, res, next) => {
 };
 
 /**
- * @api {post} /users/reset-password  reset password
+ * @api {POST} /users/reset-password  reset password
  */
 export const resetPassword: RequestHandler = async (req, res, next) => {
   const { email, otp, newPassword } = req.body;
@@ -262,7 +292,7 @@ export const resetPassword: RequestHandler = async (req, res, next) => {
 };
 
 /**
- * @api {get} /users/user-info  information data of logged in user
+ * @api {GET} /users/user-info  information data of logged in user
  */
 export const getUserAccountData = async (
   req: IRequest,
@@ -273,7 +303,7 @@ export const getUserAccountData = async (
 
   try {
     // Find User Account By Id =>
-    const userAccount = await UserModel.findById({ _id: userId }).select(
+    const userAccount = await UserModel.findById(userId).select(
       "_id username email userType age gender phone"
     );
 
@@ -294,7 +324,7 @@ export const getUserAccountData = async (
 };
 
 /**
- * @api {put} /users/update-user  update data of logged in user
+ * @api {PUT} /users/update-user  update data of logged in user
  */
 export const updateUser = async (
   req: IRequest,
@@ -389,7 +419,7 @@ export const updateUser = async (
 };
 
 /**
- * @api {patch} /users/soft-delete-user  soft delete of logged in user
+ * @api {PATCH} /users/soft-delete-user  soft delete of logged in user
  */
 export const softDeleteUser = async (
   req: IRequest,
@@ -410,32 +440,6 @@ export const softDeleteUser = async (
       status: "success",
       message: "Account Is Soft Deleted Successfully",
       data: authUser,
-    });
-  } catch (error) {
-    next(error);
-  }
-};
-
-/**
- * @api {delete} /users/hard-delete-user  hard delete of soft delete account user
- */
-export const hardDeleteUser: RequestHandler = async (req, res, next) => {
-  try {
-    // Delete All User Accounts Already Soft Deleted =>
-    const userAccounts = await UserModel.find({
-      isMarkedAsDeleted: true,
-    }).deleteMany();
-
-    // Check If There Are User Accounts Haven't Delete =>
-    if (userAccounts.deletedCount < 1) {
-      throw createHttpError(400, "There Is No Soft Deleted User Accounts Yet");
-    }
-
-    // send the response
-    res.status(201).json({
-      status: "success",
-      message:
-        "All Soft Deleted user Accounts Are Successfully Deleted From Database",
     });
   } catch (error) {
     next(error);

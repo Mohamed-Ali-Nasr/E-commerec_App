@@ -20,4 +20,6 @@ export const env = cleanEnv(process.env, {
   MAIL_PORT: port(),
   MAIL_USERNAME: str(),
   MAIL_PASSWORD: str(),
+
+  CITY_API_KEY: str(),
 });

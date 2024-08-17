@@ -17,7 +17,7 @@ import { BrandModel, ProductModel } from "../../../DB/Models";
 import { IBrand, ICategory, IRequest, ISubCategory } from "../../../types";
 
 /**
- * @api {post} /products/add  Add Product
+ * @api {POST} /products/add  Add Product
  */
 export const addProduct = async (
   req: IRequest,
@@ -109,7 +109,7 @@ export const addProduct = async (
 };
 
 /**
- * @api {put} /products/update/:productId  Update Product
+ * @api {PUT} /products/update/:productId  Update Product
  */
 export const updateProduct: RequestHandler = async (req, res, next) => {
   // productId from params
@@ -261,7 +261,7 @@ export const deleteProduct: RequestHandler = async (req, res, next) => {
 };
 
 /**
- * @api {get} /products/list  list all Products
+ * @api {GET} /products/list  list all Products
  */
 export const listProducts: RequestHandler = async (req, res, next) => {
   const { page, limit, ...filters } = req.query;
@@ -302,7 +302,7 @@ export const listProducts: RequestHandler = async (req, res, next) => {
 };
 
 /**
- * @api {get} /products/api-features  list all Products with Api Features class
+ * @api {GET} /products/api-features  list all Products with Api Features class
  */
 export const apiFeaturesProducts: RequestHandler = async (req, res, next) => {
   try {

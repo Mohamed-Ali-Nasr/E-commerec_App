@@ -1,7 +1,7 @@
 import Joi from "joi";
 import { Badges, DiscountType, objectIdRule } from "../../Utils";
 
-export const addProductSchema = {
+export const addProduct = {
   query: Joi.object({
     categoryId: Joi.string().custom(objectIdRule),
     subcategoryId: Joi.string().custom(objectIdRule),
@@ -21,7 +21,7 @@ export const addProductSchema = {
   }),
 };
 
-export const updateProductSchema = {
+export const updateProduct = {
   params: Joi.object({
     productId: Joi.string().custom(objectIdRule).required(),
   }),
@@ -39,6 +39,6 @@ export const updateProductSchema = {
   }).optional(),
 };
 
-export const deleteProductSchema = {
-  params: updateProductSchema.params,
+export const deleteProduct = {
+  params: updateProduct.params,
 };

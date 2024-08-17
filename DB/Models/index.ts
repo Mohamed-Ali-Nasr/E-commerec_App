@@ -4,3 +4,5 @@ export * from "./brand.model";
 export * from "./product.model";
 export * from "./user.model";
 export * from "./user-token.model";
+export * from "./addresses.model";
+export * from "./cart.model";

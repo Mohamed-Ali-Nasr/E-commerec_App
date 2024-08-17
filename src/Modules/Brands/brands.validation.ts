@@ -1,7 +1,7 @@
 import Joi from "joi";
 import { objectIdRule } from "../../Utils";
 
-export const createBrandSchema = {
+export const createBrand = {
   query: Joi.object({
     subcategoryId: Joi.string().custom(objectIdRule),
     categoryId: Joi.string().custom(objectIdRule),
@@ -18,7 +18,7 @@ export const createBrandSchema = {
   }),
 };
 
-export const getBrandSchema = {
+export const getBrand = {
   query: Joi.object({
     name: Joi.string(),
 
@@ -28,7 +28,7 @@ export const getBrandSchema = {
   }).optional(),
 };
 
-export const updateBrandSchema = {
+export const updateBrand = {
   body: Joi.object({
     name: Joi.string()
       .pattern(/^([A-Z]|[a-z]){3,}((\s+|\W|_)\w+)*$/)
@@ -44,11 +44,11 @@ export const updateBrandSchema = {
   }),
 };
 
-export const deleteBrandSchema = {
-  params: updateBrandSchema.params,
+export const deleteBrand = {
+  params: updateBrand.params,
 };
 
-export const relevantBrandsSchema = {
+export const relevantBrands = {
   query: Joi.object({
     subcategoryId: Joi.string().custom(objectIdRule),
     categoryId: Joi.string().custom(objectIdRule),

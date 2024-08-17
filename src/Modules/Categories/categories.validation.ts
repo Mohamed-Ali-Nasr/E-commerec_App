@@ -1,7 +1,7 @@
 import Joi from "joi";
 import { objectIdRule } from "../../Utils";
 
-export const createCategorySchema = {
+export const createCategory = {
   body: Joi.object({
     name: Joi.string()
       .pattern(/^([A-Z]|[a-z]){3,}((\s+|\W|_)\w+)*$/)
@@ -13,7 +13,7 @@ export const createCategorySchema = {
   }),
 };
 
-export const getCategorySchema = {
+export const getCategory = {
   query: Joi.object({
     name: Joi.string(),
 
@@ -23,7 +23,7 @@ export const getCategorySchema = {
   }).optional(),
 };
 
-export const updateCategorySchema = {
+export const updateCategory = {
   body: Joi.object({
     name: Joi.string()
       .pattern(/^([A-Z]|[a-z]){3,}((\s+|\W|_)\w+)*$/)
@@ -39,11 +39,11 @@ export const updateCategorySchema = {
   }),
 };
 
-export const deleteCategorySchema = {
-  params: updateCategorySchema.params,
+export const deleteCategory = {
+  params: updateCategory.params,
 };
 
-export const PaginationSchema = {
+export const Pagination = {
   query: Joi.object({
     page: Joi.string()
       .pattern(/^(. *[^0-9]|)(1000|[1-9]\d{0,2})([^0-9]. *|)$/)
