@@ -6,11 +6,14 @@ export class ApiFeatures {
   filterObject: any;
   paginationObject: any;
   mongooseQuery: any;
-  constructor(mongooseQuery: any, model: any, query: any) {
+  populate: any;
+  constructor(model: any, query: any, populate?: any) {
     // Product | Category | SubCategory |...
     this.model = model;
 
-    this.mongooseQuery = mongooseQuery;
+    this.populate = populate;
+
+    this.mongooseQuery;
     // req.query
     this.query = query;
     // Will be the filters we needed to apply | {}
@@ -21,6 +24,7 @@ export class ApiFeatures {
 
   // pagination
   pagination() {
+    console.log("============ model in Api Feature ==========", this.populate);
     const { page = 1, limit = 2 } = this.query;
     const skip = (page - 1) * limit;
 
@@ -28,6 +32,7 @@ export class ApiFeatures {
       limit: parseInt(limit),
       skip,
       page: parseInt(page),
+      populate: this.populate,
     };
 
     console.log(
@@ -39,6 +44,7 @@ export class ApiFeatures {
       this.filterObject,
       this.paginationObject
     );
+
     return this;
   }
 

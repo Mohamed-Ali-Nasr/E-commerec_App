@@ -3,9 +3,9 @@ import { objectIdRule } from "../../Utils";
 
 export const createBrand = {
   query: Joi.object({
-    subcategoryId: Joi.string().custom(objectIdRule),
-    categoryId: Joi.string().custom(objectIdRule),
-  }).required(),
+    subcategoryId: Joi.string().custom(objectIdRule).required(),
+    categoryId: Joi.string().custom(objectIdRule).required(),
+  }),
 
   body: Joi.object({
     name: Joi.string()

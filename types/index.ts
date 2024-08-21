@@ -7,3 +7,5 @@ export * from "./send-email.type";
 export * from "./user-token.type";
 export * from "./address.type";
 export * from "./cart.type";
+export * from "./coupon.type";
+export * from "./order.type";
