@@ -1,7 +1,7 @@
 import { Document } from "mongoose";
 import { IUser } from "./user.type";
 
-export interface IAdresses extends Document {
+export interface IAddress extends Document {
   _id: string;
   userId: string | IUser;
   country: string;

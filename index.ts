@@ -3,7 +3,7 @@ import express from "express";
 import http from "http";
 import createHttpError from "http-errors";
 import morgan from "morgan";
-import { env } from "./src/Utils";
+import { disableCouponsCron, env } from "./src/Utils";
 import db_connection from "./DB/connection";
 import { globalResponse } from "./src/Middlewares";
 import * as router from "./src/Modules";
@@ -24,6 +24,9 @@ app.get("/", (req, res) => res.send("Hello World"));
 /* Mongoose Connection */
 db_connection();
 
+/* Cron Jobs Handler */
+disableCouponsCron();
+
 /* Routes */
 app.use("/categories", router.categoryRouter);
 app.use("/sub-categories", router.subCategoryRouter);
@@ -32,6 +35,8 @@ app.use("/products", router.productRouter);
 app.use("/users", router.userRouter);
 app.use("/addresses", router.addressRouter);
 app.use("/carts", router.cartRouter);
+app.use("/coupons", router.couponRouter);
+app.use("/orders", router.orderRouter);
 
 /* Error Handling */
 app.use((req, res, next) => {

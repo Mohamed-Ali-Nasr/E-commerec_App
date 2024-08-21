@@ -306,12 +306,7 @@ export const listProducts: RequestHandler = async (req, res, next) => {
  */
 export const apiFeaturesProducts: RequestHandler = async (req, res, next) => {
   try {
-    const mongooseQuery = ProductModel.find();
-    const ApiFeaturesInstance = new ApiFeatures(
-      mongooseQuery,
-      ProductModel,
-      req.query
-    )
+    const ApiFeaturesInstance = new ApiFeatures(ProductModel, req.query)
       .pagination()
       .filters()
       .sort();

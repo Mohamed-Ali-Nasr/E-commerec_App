@@ -14,10 +14,10 @@ export const globalResponse = (
     statusCode = error.status;
     errorMessage = error.message;
     res.status(statusCode).json({ error: errorMessage });
+  } else {
+    res.status(statusCode).json({
+      error: errorMessage,
+      err_stack: error.stack,
+    });
   }
-
-  res.status(statusCode).json({
-    error: errorMessage,
-    err_stack: error.stack,
-  });
 };
