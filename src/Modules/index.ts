@@ -7,3 +7,4 @@ export * from "./Addresses/addresses.route";
 export * from "./Carts/carts.route";
 export * from "./Coupons/coupons.route";
 export * from "./Orders/orders.route";
+export * from "./Reviews/reviews.route";

@@ -9,3 +9,4 @@ export * from "./address.type";
 export * from "./cart.type";
 export * from "./coupon.type";
 export * from "./order.type";
+export * from "./review.type";

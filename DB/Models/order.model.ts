@@ -4,7 +4,6 @@ import { OrderStatus, PaymentMethod } from "../../src/Utils";
 import { CouponModel } from "./coupon.model";
 import { ProductModel } from "./product.model";
 
-// Create Coupon Schema object
 const OrderSchema = new Schema<IOrder>(
   {
     userId: {
@@ -70,6 +69,8 @@ const OrderSchema = new Schema<IOrder>(
     deliveredAt: { type: Date },
 
     canceledAt: { type: Date },
+
+    payment_intent: { type: String },
   },
   { timestamps: true }
 );

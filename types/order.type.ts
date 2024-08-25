@@ -40,4 +40,5 @@ export interface IOrder extends Document {
   deliveredAt: Date;
   canceledAt: Date;
   createdAt: Date;
+  payment_intent: string;
 }

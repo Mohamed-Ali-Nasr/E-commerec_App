@@ -22,4 +22,8 @@ export const env = cleanEnv(process.env, {
   MAIL_PASSWORD: str(),
 
   CITY_API_KEY: str(),
+
+  STRIPE_SECRET_KEY: str(),
+  SUCCESS_URL: str(),
+  CANCEL_URL: str(),
 });

@@ -1,4 +1,4 @@
-import { NextFunction, Response } from "express";
+import { NextFunction, RequestHandler, Response } from "express";
 import createHttpError from "http-errors";
 // utils
 import { calculateCartSubTotal } from "../Carts/carts.util";
@@ -9,6 +9,9 @@ import { AddressModel, CartModel, OrderModel } from "../../../DB/Models";
 // types
 import { IProduct, IRequest } from "../../../types";
 import { DateTime } from "luxon";
+// stripe payment
+import * as stripe from "../../payment-handler/stripe";
+import Stripe from "stripe";
 
 /**
  * @api {POST} /orders/create  create a new order
@@ -256,6 +259,224 @@ export const listOrders = async (
       status: "success",
       message: "Orders list",
       data: orders,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * @api {POST} /orders/stripe-pay/:orderId  payment with stripe
+ */
+export const paymentWithStripe = async (
+  req: IRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  const { userId } = req;
+  const { orderId } = req.params;
+
+  try {
+    // get order data by orderId
+    const order = await OrderModel.findOne({
+      _id: orderId,
+      userId,
+      orderStatus: OrderStatus.PENDING,
+    });
+    if (!order) {
+      throw createHttpError(404, "Order not found");
+    }
+
+    // create tax rate
+    const taxRate = await stripe.createTaxRate({ percentage: order.VAT });
+
+    // prepare payment object
+    const paymentObject = {
+      customer_email: req.authUser?.email,
+      metadata: { orderId: order._id.toString() } as Stripe.MetadataParam,
+      discounts: [] as Stripe.Checkout.SessionCreateParams.Discount[],
+      line_items: order.products.map((product) => {
+        return {
+          price_data: {
+            currency: "egp",
+            unit_amount: product.price * 100, // in cents
+            product_data: {
+              name: req.authUser?.username,
+            },
+          },
+
+          quantity: product.quantity,
+          tax_rates: [taxRate.id],
+        };
+      }) as Stripe.Checkout.SessionCreateParams.LineItem[],
+
+      shipping_options: [
+        {
+          shipping_rate_data: {
+            type: "fixed_amount",
+            fixed_amount: {
+              amount: 0,
+              currency: "egp",
+            },
+            display_name: "Free shipping",
+            delivery_estimate: {
+              minimum: {
+                unit: "business_day",
+                value: 5,
+              },
+              maximum: {
+                unit: "business_day",
+                value: 7,
+              },
+            },
+          },
+        },
+        {
+          shipping_rate_data: {
+            type: "fixed_amount",
+            fixed_amount: {
+              amount: order.shippingFee * 100,
+              currency: "egp",
+            },
+            display_name: "Next day air",
+            delivery_estimate: {
+              minimum: {
+                unit: "business_day",
+                value: 1,
+              },
+              maximum: {
+                unit: "business_day",
+                value: 1,
+              },
+            },
+          },
+        },
+      ] as Stripe.Checkout.SessionCreateParams.ShippingOption[],
+    };
+
+    // check if the order has coupon code
+    if (order.couponId) {
+      const stripeCoupon = await stripe.createStripeCoupon({
+        couponId: order.couponId as string,
+      });
+
+      if (!stripeCoupon.valid) {
+        throw createHttpError(400, "unknown stripe error");
+      }
+
+      paymentObject.discounts.push({ coupon: stripeCoupon.id });
+    }
+
+    // create checkout session
+    const session = await stripe.createCheckoutSession(paymentObject);
+
+    // create payment intent
+    const paymentIntent = await stripe.createPaymentIntent({
+      amount: session.amount_total as number,
+      currency: "egp",
+    });
+
+    // update payment intent
+    order.payment_intent = paymentIntent.id;
+
+    // save order model
+    await order.save();
+
+    // send the response
+    res.status(200).json({
+      status: "success",
+      message: "payment session created successfully",
+      data: { session, paymentIntent },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * @api {POST} /orders/webhook  stripe webhook if payment success
+ */
+export const localStripeWebhook: RequestHandler = async (req, res, next) => {
+  try {
+    // get the orderId from body of request after payment completion event
+    const orderId = req.body.data.object.metadata.orderId;
+    if (!orderId) {
+      throw createHttpError(
+        400,
+        "unknown error occurred durning confirm payment with stripe"
+      );
+    }
+
+    // update order status after payment completion
+    const confirmOrder = await OrderModel.findByIdAndUpdate(
+      orderId,
+      {
+        orderStatus: OrderStatus.CONFIRMED,
+      },
+      { new: true }
+    );
+
+    // confirm payment intent
+    const confirmPayment = await stripe.confirmPaymentIntent({
+      paymentIntentId: confirmOrder?.payment_intent as string,
+    });
+
+    // send the response
+    res.status(200).json({
+      status: "success",
+      message: "payment confirmed successfully",
+      data: confirmOrder,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * @api {POST} /orders/refund/:orderId  refund payment with stripe
+ */
+export const refundPaymentData = async (
+  req: IRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  const { orderId } = req.params;
+  const { userId } = req;
+
+  try {
+    // get order data by orderId
+    const order = await OrderModel.findOne({
+      _id: orderId,
+      userId,
+      orderStatus: OrderStatus.CONFIRMED,
+    });
+    if (!order) {
+      throw createHttpError(404, "Order not found");
+    }
+
+    // refund payment data
+    const refund = await stripe.refundPayment({
+      paymentIntentId: order.payment_intent,
+    });
+
+    if (refund.status === "failed") {
+      throw createHttpError(
+        400,
+        "unknown error occurred durning refund payment with stripe"
+      );
+    }
+
+    // update order status
+    order.orderStatus = OrderStatus.REFUNDED;
+
+    // save order model
+    await order.save();
+
+    // send the response
+    res.status(200).json({
+      status: "success",
+      message: "payment refund successfully",
+      data: { order },
     });
   } catch (error) {
     next(error);

@@ -36,3 +36,7 @@ export const canceledOrder = {
 export const deliveredOrder = {
   params: canceledOrder.params,
 };
+
+export const paymentWithStripe = {
+  params: canceledOrder.params,
+};

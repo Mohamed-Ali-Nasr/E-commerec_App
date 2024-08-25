@@ -37,6 +37,12 @@ app.use("/addresses", router.addressRouter);
 app.use("/carts", router.cartRouter);
 app.use("/coupons", router.couponRouter);
 app.use("/orders", router.orderRouter);
+app.use("/reviews", router.reviewRouter);
+
+/* Handle Any Unknown Route */
+app.use("*", (req, res, next) => {
+  res.status(404).json({ message: "Route Not Found" });
+});
 
 /* Error Handling */
 app.use((req, res, next) => {
