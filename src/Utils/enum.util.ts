@@ -42,6 +42,12 @@ export const OrderStatus = {
   ON_WAY: "on_way",
 };
 
+export const ReviewStatus = {
+  PENDING: "pending",
+  ACCEPTED: "accepted",
+  REJECTED: "rejected",
+};
+
 // Handle System Roles For Authorizations =>
 export const userRole = {
   BUYER: "Buyer",

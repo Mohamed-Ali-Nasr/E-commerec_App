@@ -45,4 +45,22 @@ orderRouter.get(
   controller.listOrders
 );
 
+orderRouter.post(
+  "/stripe-payment/:orderId",
+  authMiddleware,
+  authorization(roles.BUYER),
+  validationMiddleware(schema.paymentWithStripe),
+  controller.paymentWithStripe
+);
+
+orderRouter.post("/webhook", controller.localStripeWebhook);
+
+orderRouter.post(
+  "/refund/:orderId",
+  authMiddleware,
+  authorization(roles.BUYER),
+  validationMiddleware(schema.paymentWithStripe),
+  controller.refundPaymentData
+);
+
 export { orderRouter };

@@ -74,8 +74,15 @@ const ProductSchema = new Schema<IProduct>(
       required: true,
     },
   },
-  { timestamps: true }
+  { timestamps: true, toJSON: { virtuals: true }, id: false }
 );
+
+// add virtual reviews property which ref on Review Model
+ProductSchema.virtual("reviews", {
+  ref: "Review",
+  localField: "_id",
+  foreignField: "productId",
+});
 
 export type IProductSchema = mongoose.Document & IProduct;
 

@@ -9,6 +9,7 @@ import {
   cloudinaryConfig,
   env,
   replaceFilters,
+  ReviewStatus,
   uploadFile,
 } from "../../Utils";
 // models
@@ -306,7 +307,19 @@ export const listProducts: RequestHandler = async (req, res, next) => {
  */
 export const apiFeaturesProducts: RequestHandler = async (req, res, next) => {
   try {
-    const ApiFeaturesInstance = new ApiFeatures(ProductModel, req.query)
+    const populatedArray = [
+      {
+        path: "reviews",
+        match: { reviewStatus: ReviewStatus.ACCEPTED },
+        select: "-productId userId reviewRating reviewStatus reviewContent",
+      },
+    ];
+
+    const ApiFeaturesInstance = new ApiFeatures(
+      ProductModel,
+      req.query,
+      populatedArray
+    )
       .pagination()
       .filters()
       .sort();
