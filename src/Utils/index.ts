@@ -10,3 +10,4 @@ export * from "./sendEmail.util";
 export * from "./generateTokens.util";
 export * from "./generateOtp.util";
 export * from "./crons.utils";
+export * from "./socket.io.util";

@@ -5,7 +5,7 @@ import { OrderModel, ProductModel, ReviewModel } from "../../../DB/Models";
 // types
 import { IRequest } from "../../../types";
 // utils
-import { OrderStatus, ReviewStatus } from "../../Utils";
+import { getSocketIO, OrderStatus, ReviewStatus } from "../../Utils";
 
 /**
  * @api {POST} /reviews/add  add a new review
@@ -52,6 +52,12 @@ export const addReview = async (
 
     // Save New Review To Database =>
     await newReview.save();
+
+    // socket event to notify client when add an review
+    getSocketIO().emit("addReview", {
+      message: "your review is added successfully",
+      review: newReview,
+    });
 
     // send the response
     res.status(201).json({

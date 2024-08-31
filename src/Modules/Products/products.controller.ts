@@ -8,6 +8,7 @@ import {
   calculateProductPrice,
   cloudinaryConfig,
   env,
+  getSocketIO,
   replaceFilters,
   ReviewStatus,
   uploadFile,
@@ -97,6 +98,9 @@ export const addProduct = async (
     // Push the id of new product to products id Array in brand Model
     (brand?.productsId as string[]).push(newProduct._id);
     await brand?.save();
+
+    // socket event to notify all clients if new product is added
+    getSocketIO().emit("addedDone", { message: "new product" });
 
     // send the response
     res.status(201).json({
