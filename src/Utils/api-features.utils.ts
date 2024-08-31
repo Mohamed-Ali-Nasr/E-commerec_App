@@ -25,7 +25,7 @@ export class ApiFeatures {
   // pagination
   pagination() {
     console.log("============ model in Api Feature ==========", this.populate);
-    const { page = 1, limit = 2 } = this.query;
+    const { page = 1, limit = 5 } = this.query;
     const skip = (page - 1) * limit;
 
     this.paginationObject = {

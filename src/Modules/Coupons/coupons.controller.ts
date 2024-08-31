@@ -3,7 +3,9 @@ import createHttpError from "http-errors";
 // models
 import { CouponLogsModel, CouponModel, UserModel } from "../../../DB/Models";
 // types
-import { IRequest } from "../../../types";
+import { ICoupon, IRequest } from "../../../types";
+// utils
+import { getSocketIO } from "../../Utils";
 
 /**
  * @api {POST} /coupons/create  create a new coupon
@@ -44,6 +46,20 @@ export const createCoupon = async (
 
     // Save New Coupon To Database =>
     await newCoupon.save();
+
+    // socket event to notify client when coupon is added
+    getSocketIO().on("new coupon", (coupon: ICoupon) => {
+      coupon.users.forEach((u) => {
+        users.forEach((user: any) => {
+          if (u.userId.toString() === user.userId.toString()) {
+            getSocketIO().to(user.userId).emit("coupon added", {
+              message: "new coupon is added",
+              maxCount: user.maxCount,
+            });
+          }
+        });
+      });
+    });
 
     // send the response
     res.status(201).json({

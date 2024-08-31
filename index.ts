@@ -7,11 +7,17 @@ import { disableCouponsCron, env } from "./src/Utils";
 import db_connection from "./DB/connection";
 import { globalResponse } from "./src/Middlewares";
 import * as router from "./src/Modules";
+import cors from "cors";
+import { Server } from "socket.io";
+import { corsOptions } from "./src/config/corsOptions";
+import { allowedOrigins } from "./src/config/allowedOrigins";
+import { establishSocketConnection } from "./src/Utils/socket.io.util";
 
 /* Configuration and Middlewares */
 const app = express();
 app.use(express.json());
 app.use(morgan("dev"));
+app.use(cors(corsOptions));
 
 /* Creating Server */
 const PORT = env.PORT || 8080;
@@ -20,6 +26,14 @@ server.listen(PORT, () => {
   console.log(`Server running on port: ${PORT}`);
 });
 app.get("/", (req, res) => res.send("Hello World"));
+
+/* Socket Connection */
+const io = establishSocketConnection(server);
+
+io.on("connection", (socket) => {
+  socket.removeAllListeners();
+  console.log("User Connected to socket.io");
+});
 
 /* Mongoose Connection */
 db_connection();

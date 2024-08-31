@@ -3,7 +3,12 @@ import createHttpError from "http-errors";
 // utils
 import { calculateCartSubTotal } from "../Carts/carts.util";
 import { applyCoupon, validateCoupon } from "./orders.util";
-import { ApiFeatures, OrderStatus, PaymentMethod } from "../../Utils";
+import {
+  ApiFeatures,
+  getSocketIO,
+  OrderStatus,
+  PaymentMethod,
+} from "../../Utils";
 // models
 import { AddressModel, CartModel, OrderModel } from "../../../DB/Models";
 // types
@@ -419,6 +424,12 @@ export const localStripeWebhook: RequestHandler = async (req, res, next) => {
     // confirm payment intent
     const confirmPayment = await stripe.confirmPaymentIntent({
       paymentIntentId: confirmOrder?.payment_intent as string,
+    });
+
+    // socket event to notify client when confirm payment
+    getSocketIO().emit("confirmOrderPayment", {
+      message: "your order payment is confirmed successfully",
+      order: confirmOrder,
     });
 
     // send the response
