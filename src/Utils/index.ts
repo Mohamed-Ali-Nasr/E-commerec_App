@@ -11,3 +11,4 @@ export * from "./generateTokens.util";
 export * from "./generateOtp.util";
 export * from "./crons.utils";
 export * from "./socket.io.util";
+export * from "./qr-code.util";

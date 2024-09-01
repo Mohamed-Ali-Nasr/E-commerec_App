@@ -5,6 +5,7 @@ import { calculateCartSubTotal } from "../Carts/carts.util";
 import { applyCoupon, validateCoupon } from "./orders.util";
 import {
   ApiFeatures,
+  generateQRCode,
   getSocketIO,
   OrderStatus,
   PaymentMethod,
@@ -127,11 +128,15 @@ export const createOrder = async (
     cart.products = [];
     await cart.save();
 
+    // generate QR code
+    const qrCode = await generateQRCode([newOrder._id] as any[]);
+
     // send the response
     res.status(201).json({
       status: "success",
       message: "Order is created successfully",
       data: newOrder,
+      qr_code: qrCode,
     });
   } catch (error) {
     next(error);

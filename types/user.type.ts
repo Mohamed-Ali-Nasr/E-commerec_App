@@ -13,4 +13,6 @@ export interface IUser extends Document {
   isMarkedAsDeleted: boolean;
   otp: string | null;
   otpExpires: Date | null;
+  provider: "System" | "Google";
+  isLoggedIn: boolean;
 }

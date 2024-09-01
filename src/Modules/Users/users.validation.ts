@@ -125,5 +125,13 @@ export const updateUser = {
       .messages({
         "string.pattern.base": "Invalid age. please enter a valid age",
       }),
+    gender: Joi.string().valid(...Object.values(gender)),
+    userType: Joi.string().valid(...Object.values(userRole)),
   }).optional(),
+};
+
+export const loginWithGoogle = {
+  body: Joi.object({
+    idToken: Joi.string().required(),
+  }),
 };

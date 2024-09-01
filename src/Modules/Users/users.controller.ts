@@ -3,8 +3,17 @@ import createHttpError from "http-errors";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
+import { OAuth2Client } from "google-auth-library";
 // utils
-import { env, generateOTP, generateTokens, sendEmail } from "../../Utils";
+import {
+  env,
+  gender,
+  generateOTP,
+  generateTokens,
+  provider,
+  sendEmail,
+  userRole,
+} from "../../Utils";
 // models
 import { AddressModel, UserModel } from "../../../DB/Models";
 // types
@@ -332,7 +341,7 @@ export const updateUser = async (
   next: NextFunction
 ) => {
   const { userId } = req;
-  const { username, email, age, phone } = req.body;
+  const { username, email, age, phone, gender, userType } = req.body;
 
   try {
     // Find User Account By Id =>
@@ -404,6 +413,16 @@ export const updateUser = async (
       user.phone = phone;
     }
 
+    // Check If gender Is Updated =>
+    if (gender) {
+      user.gender = gender;
+    }
+
+    // Check If userType Is Updated =>
+    if (userType) {
+      user.userType = userType;
+    }
+
     // Save Updated User Account To Database =>
     await user.save();
 
@@ -440,6 +459,97 @@ export const softDeleteUser = async (
       status: "success",
       message: "Account Is Soft Deleted Successfully",
       data: authUser,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * @api {POST} /users/loginWithGoogle  login with google
+ */
+export const loginWithGoogle = async (
+  req: IRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  const { idToken } = req.body;
+  try {
+    // verify token
+    const client = new OAuth2Client();
+    const verify = async () => {
+      const ticket = await client.verifyIdToken({
+        idToken,
+        audience: env.GOOGLE_CLIENT_ID,
+      });
+      const payload = ticket.getPayload();
+
+      return payload;
+    };
+    const result = await verify().catch(console.error);
+
+    // check if email is not verified
+    if (!result?.email_verified) {
+      throw createHttpError(
+        400,
+        "Email Is Not Verified ,Please Verify Your Email Address"
+      );
+    }
+
+    // Find User By Email =>
+    const user = await UserModel.findOne({
+      email: result?.email,
+      provider: provider.GOOGLE,
+    });
+
+    // Check If User Account Not Exists In Database then go to signup
+    if (!user) {
+      // Check If Email Exists In Database =>
+      const existingUser = await UserModel.findOne({ email: result?.email });
+      if (existingUser) {
+        throw createHttpError(
+          400,
+          "User Already Exists. Please Choose a Different Or Log In Instead."
+        );
+      }
+
+      const randomPassword = Math.random().toString(36).slice(-8);
+      // create new user instance
+      const newUser = new UserModel({
+        username: result?.name,
+        email: result?.email,
+        password: randomPassword,
+        userType: userRole.BUYER,
+        age: "20",
+        gender: gender.MALE,
+        phone: "01000000000",
+        provider: provider.GOOGLE,
+        isEmailVerified: true,
+      });
+
+      // Save New User To Database =>
+      await newUser.save();
+
+      // send the response
+      res.status(201).json({
+        status: "success",
+        message: "user created successfully, Please update your personal data",
+        user: newUser,
+      });
+    }
+
+    // Generate Token For Existing User =>
+    const { accessToken } = await generateTokens(user!);
+
+    // update isLoggedIn state of user
+    user!.isLoggedIn = true;
+    await user?.save();
+
+    // send the response
+    res.status(201).json({
+      status: "success",
+      message: "login with google success",
+      data: { result, token: accessToken },
     });
   } catch (error) {
     next(error);
