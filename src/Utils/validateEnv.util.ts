@@ -26,4 +26,6 @@ export const env = cleanEnv(process.env, {
   STRIPE_SECRET_KEY: str(),
   SUCCESS_URL: str(),
   CANCEL_URL: str(),
+
+  GOOGLE_CLIENT_ID: str(),
 });

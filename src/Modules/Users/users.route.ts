@@ -62,4 +62,10 @@ userRouter.put(
 
 userRouter.patch("/soft-delete", authMiddleware, controller.softDeleteUser);
 
+userRouter.post(
+  "/loginWithGoogle",
+  validationMiddleware(schema.loginWithGoogle),
+  controller.loginWithGoogle
+);
+
 export { userRouter };

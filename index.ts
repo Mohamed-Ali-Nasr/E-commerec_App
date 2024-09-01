@@ -8,9 +8,7 @@ import db_connection from "./DB/connection";
 import { globalResponse } from "./src/Middlewares";
 import * as router from "./src/Modules";
 import cors from "cors";
-import { Server } from "socket.io";
 import { corsOptions } from "./src/config/corsOptions";
-import { allowedOrigins } from "./src/config/allowedOrigins";
 import { establishSocketConnection } from "./src/Utils/socket.io.util";
 
 /* Configuration and Middlewares */

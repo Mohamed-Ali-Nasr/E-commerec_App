@@ -14,6 +14,11 @@ export const gender = {
   FEMALE: "Female",
 };
 
+export const provider = {
+  SYSTEM: "System",
+  GOOGLE: "Google",
+};
+
 export const CouponType = {
   PERCENTAGE: "Percentage",
   Amount: "Amount",

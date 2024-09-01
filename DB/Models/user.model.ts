@@ -1,6 +1,6 @@
 import mongoose from "../global-setup";
 import { IUser } from "../../types";
-import { env, gender, userRole } from "../../src/Utils";
+import { env, gender, provider, userRole } from "../../src/Utils";
 import bcrypt from "bcryptjs";
 
 const { Schema, model } = mongoose;
@@ -28,6 +28,14 @@ const UserSchema = new Schema<IUser>(
     otp: { type: String },
 
     otpExpires: { type: Date },
+
+    provider: {
+      type: String,
+      default: "System",
+      enum: Object.values(provider),
+    },
+
+    isLoggedIn: { type: Boolean, default: false },
   },
   { timestamps: true }
 );
