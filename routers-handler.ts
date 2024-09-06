@@ -2,15 +2,21 @@ import { json, Express } from "express";
 import cors from "cors";
 import { corsOptions } from "./src/config/corsOptions";
 import * as router from "./src/Modules";
-import { globalResponse } from "./src/Middlewares";
+import { authMiddleware, globalResponse } from "./src/Middlewares";
 import createHttpError from "http-errors";
 import morgan from "morgan";
+import { createHandler } from "graphql-http/lib/use/express";
+import { mainSchema } from "./src/GraphQl/Schema";
 
 export const routerHandler = (app: Express) => {
   app.use(morgan("dev"));
   app.use(cors(corsOptions));
   app.use(json());
 
+  // GraphQL Routes
+  app.use("/graphql", createHandler({ schema: mainSchema }));
+
+  // Rest API Routes
   app.use("/categories", router.categoryRouter);
   app.use("/sub-categories", router.subCategoryRouter);
   app.use("/brands", router.brandRouter);
