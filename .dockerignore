@@ -1,0 +1,11 @@
+/node_modules
+
+Dockerfile
+
+docker-compose*
+
+.env
+
+*.txt
+
+package.lock.json

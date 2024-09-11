@@ -3,6 +3,7 @@ import {
   GraphQLEnumType,
   GraphQLFloat,
   GraphQLID,
+  GraphQLInputObjectType,
   GraphQLInt,
   GraphQLList,
   GraphQLObjectType,
@@ -19,6 +20,15 @@ const CouponTypeEnum = new GraphQLEnumType({
   },
 });
 
+const couponUserType = new GraphQLObjectType({
+  name: "couponUserType",
+  description: "This is The Coupon User Type",
+  fields: {
+    userId: { type: GraphQLID },
+    maxCount: { type: GraphQLInt },
+  },
+});
+
 export const CouponType = new GraphQLObjectType({
   name: "CouponType",
   description: "This is The Coupon Type",
@@ -29,9 +39,18 @@ export const CouponType = new GraphQLObjectType({
     couponType: { type: CouponTypeEnum },
     from: { type: GraphQLString },
     till: { type: GraphQLString },
-    stock: { type: GraphQLInt },
     isEnable: { type: GraphQLBoolean },
     createdBy: { type: GraphQLID },
+    users: { type: new GraphQLList(couponUserType) },
+  },
+});
+
+const couponUserInput = new GraphQLInputObjectType({
+  name: "couponUserInput",
+  description: "This is The Coupon User Input",
+  fields: {
+    userId: { type: GraphQLID },
+    maxCount: { type: GraphQLInt },
   },
 });
 
@@ -41,6 +60,6 @@ export const CreateCouponArgs = {
   couponType: { type: CouponTypeEnum },
   from: { type: GraphQLString },
   till: { type: GraphQLString },
-  stock: { type: GraphQLInt },
   token: { type: GraphQLString },
+  users: { type: new GraphQLList(couponUserInput) },
 };

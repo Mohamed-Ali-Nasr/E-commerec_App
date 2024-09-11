@@ -1,0 +1,7 @@
+version: "2.29.1"
+
+services:
+  ecommerce-app:
+    build:
+      context: .
+      target: production

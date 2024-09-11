@@ -13,6 +13,8 @@ export const main = () => {
   const PORT = env.PORT || 8080;
   const server = http.createServer(app);
 
+  app.get("/", (req, res) => res.send("Hello World!"));
+
   /* Routers Handling */
   routerHandler(app);
 
@@ -28,5 +30,4 @@ export const main = () => {
   server.listen(PORT, () => {
     console.log(`Server running on port: ${PORT}`);
   });
-  app.get("/", (req, res) => res.send("Hello World"));
 };

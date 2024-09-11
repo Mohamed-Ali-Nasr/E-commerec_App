@@ -48,18 +48,8 @@ productRouter.delete(
   controller.deleteProduct
 );
 
-productRouter.get(
-  "/list",
-  authMiddleware,
-  authorization(roles.BUYER_ADMIN),
-  controller.listProducts
-);
+productRouter.get("/list", controller.listProducts);
 
-productRouter.get(
-  "/api-features",
-  authMiddleware,
-  authorization(roles.BUYER_ADMIN),
-  controller.apiFeaturesProducts
-);
+productRouter.get("/api-features", controller.apiFeaturesProducts);
 
 export { productRouter };

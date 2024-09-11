@@ -4,8 +4,8 @@
   "description": "",
   "main": "dist/index.js",
   "scripts": {
-    "start": "npm run build && node dist/index.js",
-    "dev": "nodemon -L ./index.ts",
+    "start:prod": "node dist/index.js",
+    "start:dev": "nodemon -L ./index.ts",
     "build": "npx tsc"
   },
   "keywords": [],

@@ -1,5 +1,5 @@
 import Joi from "joi";
-import { CouponType } from "../../Utils";
+import { CouponType, objectIdRule } from "../../Utils";
 
 export const createCouponValidator = Joi.object({
   couponCode: Joi.string().required(),
@@ -25,4 +25,13 @@ export const createCouponValidator = Joi.object({
   till: Joi.date().greater(Joi.ref("from")).required(),
 
   token: Joi.string().required(),
+
+  users: Joi.array()
+    .items(
+      Joi.object({
+        userId: Joi.string().custom(objectIdRule).required(),
+        maxCount: Joi.number().min(1).required(),
+      }).required()
+    )
+    .required(),
 });

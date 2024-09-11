@@ -1,0 +1,13 @@
+version: "2.29.1"
+
+services:
+  ecommerce-app:
+    container_name: nodejs-ecommerce-app
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./.env
+
+  mongodb:
+    image: mongo
+    restart: always

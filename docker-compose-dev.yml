@@ -1,0 +1,15 @@
+version: "2.29.1"
+
+services:
+  ecommerce-app:
+    build:
+      context: .
+      target: development
+    volumes:
+      - ./src:/app/src:ro
+      - ./DB:/app/DB:ro
+      - ./index.ts:/app/index.ts:ro
+      - ./initiate-app.ts:/app/initiate-app.ts:ro
+      - ./routers-handler.ts:/app/routers-handler.ts:ro
+      - ./crons-handler.ts:/app/crons-handler.ts:ro
+      - ./socket_connection.ts:/app/socket_connection.ts:ro
